@@ -10,7 +10,7 @@ extra-source-files:
   - README.md
   - ChangeLog.md
 
-synopsis: A lightweight Haskell library for waiting on networked services to become available.
+synopsis: Lightweight library for waiting on networked services to become available.
 category: Network
 
 description: Please see the README on GitHub at <https://github.com/mbg/network-wait#readme>

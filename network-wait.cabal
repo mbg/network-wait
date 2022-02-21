@@ -6,7 +6,7 @@ cabal-version: 1.12
 
 name:           network-wait
 version:        0.1.0.0
-synopsis:       A lightweight Haskell library for waiting on networked services to become available.
+synopsis:       Lightweight library for waiting on networked services to become available.
 description:    Please see the README on GitHub at <https://github.com/mbg/network-wait#readme>
 category:       Network
 homepage:       https://github.com/mbg/network-wait#readme
