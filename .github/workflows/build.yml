@@ -1,0 +1,56 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+    paths:
+      - ".github/workflows/**"
+      - "src/**"
+      - "test/**"
+      - "package.yaml"
+      - "stack*.yaml"
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - resolver: "stack-lts18"
+            ghc-version: "8.10.7"
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: haskell/actions/setup@v1
+        id: install-haskell
+        with:
+          ghc-version: ${{ matrix.ghc-version }}
+          enable-stack: true
+          stack-version: "latest"
+
+      - name: Cache .stack
+        id: cache-stack
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.install-haskell.outputs.stack-root }}
+          key: ${{ runner.os }}-${{ matrix.resolver }}-${{ hashFiles(format('{0}.yaml', matrix.resolver)) }}-${{ hashFiles('*.cabal') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.resolver }}-${{ hashFiles(format('{0}.yaml', matrix.resolver)) }}-
+            ${{ runner.os }}-${{ matrix.resolver }}-
+            ${{ runner.os }}-
+
+      - name: Install dependencies
+        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build --only-dependencies --test --haddock --fast
+
+      - name: Build
+        id: build
+        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build --fast --test --no-run-tests
+
+      - name: Test
+        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build --fast --test
