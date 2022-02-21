@@ -21,6 +21,9 @@ dependencies:
   - network
   - retry
 
+ghc-options:
+  - -Wall
+
 library:
   source-dirs: src
 
@@ -28,11 +31,8 @@ tests:
   network-wait-test:
     main: Spec.hs
     source-dirs: test
-    ghc-options:
-      - -threaded
-      - -rtsopts
-      - -with-rtsopts=-N
     dependencies:
       - network-wait
+      - network-simple
       - tasty
       - tasty-hunit
