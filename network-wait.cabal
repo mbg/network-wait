@@ -72,3 +72,28 @@ test-suite network-wait-test
     build-depends:
         postgresql-simple
   default-language: Haskell2010
+
+test-suite network-wait-test-postgres
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_network_wait
+  hs-source-dirs:
+      test-postgres
+  ghc-options: -Wall
+  build-depends:
+      base >=4.7 && <5
+    , exceptions
+    , network
+    , network-wait
+    , retry
+    , tasty
+    , tasty-hunit
+  if flag(postgres)
+    build-depends:
+        postgresql-simple
+  if flag(postgres)
+    buildable: True
+  else
+    buildable: False
+  default-language: Haskell2010

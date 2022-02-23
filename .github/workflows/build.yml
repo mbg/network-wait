@@ -62,5 +62,15 @@ jobs:
         id: build
         run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build ${{ matrix.cabal-flags }} --fast --test --no-run-tests
 
+      - name: Start Docker containers (PostgreSQL)
+        if: ${{ contains(matrix.cabal-flags, 'network-wait:postgres') }}
+        run: |
+          docker-compose -f docker-compose.postgresql.yaml up -d
+
       - name: Test
         run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build ${{ matrix.cabal-flags }} --fast --test
+
+      - name: Stop Docker containers (PostgreSQL)
+        if: ${{ contains(matrix.cabal-flags, 'network-wait:postgres') }}
+        run: |
+          docker-compose -f docker-compose.postgresql.yaml down

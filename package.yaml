@@ -50,3 +50,16 @@ tests:
       - network-simple
       - tasty
       - tasty-hunit
+  network-wait-test-postgres:
+    main: Spec.hs
+    source-dirs: test-postgres
+    dependencies:
+      - network-wait
+      - tasty
+      - tasty-hunit
+    when:
+      condition: flag(postgres)
+      then:
+        buildable: true
+      else:
+        buildable: false
