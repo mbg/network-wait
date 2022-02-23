@@ -21,6 +21,10 @@ jobs:
         include:
           - resolver: "stack-lts18"
             ghc-version: "8.10.7"
+            cabal-flags: ""
+          - resolver: "stack-lts18"
+            ghc-version: "8.10.7"
+            cabal-flags: "--flag network-wait:postgres"
 
     runs-on: ubuntu-latest
 
@@ -34,23 +38,29 @@ jobs:
           enable-stack: true
           stack-version: "latest"
 
+      - name: Write flags to file (for hashing)
+        run: |
+          echo ${{ matrix.cabal-flags }} > .cabal-flags
+          cat .cabal-flags
+
       - name: Cache .stack
         id: cache-stack
         uses: actions/cache@v2
         with:
           path: ${{ steps.install-haskell.outputs.stack-root }}
-          key: ${{ runner.os }}-${{ matrix.resolver }}-${{ hashFiles(format('{0}.yaml', matrix.resolver)) }}-${{ hashFiles('*.cabal') }}
+          key: ${{ runner.os }}-${{ matrix.resolver }}-${{ hashFiles(format('{0}.yaml', matrix.resolver)) }}-${{ hashFiles('*.cabal') }}-${{ hashFiles('.cabal-flags') }}
           restore-keys: |
+            ${{ runner.os }}-${{ matrix.resolver }}-${{ hashFiles(format('{0}.yaml', matrix.resolver)) }}-${{ hashFiles('*.cabal') }}-
             ${{ runner.os }}-${{ matrix.resolver }}-${{ hashFiles(format('{0}.yaml', matrix.resolver)) }}-
             ${{ runner.os }}-${{ matrix.resolver }}-
             ${{ runner.os }}-
 
       - name: Install dependencies
-        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build --only-dependencies --test --haddock --fast
+        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build ${{ matrix.cabal-flags }} --only-dependencies --test --haddock --fast
 
       - name: Build
         id: build
-        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build --fast --test --no-run-tests
+        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build ${{ matrix.cabal-flags }} --fast --test --no-run-tests
 
       - name: Test
-        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build --fast --test
+        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build ${{ matrix.cabal-flags }} --fast --test

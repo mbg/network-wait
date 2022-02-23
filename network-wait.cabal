@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.5.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 
@@ -25,6 +25,11 @@ source-repository head
   type: git
   location: https://github.com/mbg/network-wait
 
+flag postgres
+  description: Enable Postgres support.
+  manual: True
+  default: False
+
 library
   exposed-modules:
       Network.Wait
@@ -38,6 +43,12 @@ library
     , exceptions
     , network
     , retry
+  if flag(postgres)
+    build-depends:
+        postgresql-simple
+  if flag(postgres)
+    exposed-modules:
+        Network.Wait.PostgreSQL
   default-language: Haskell2010
 
 test-suite network-wait-test
@@ -57,4 +68,7 @@ test-suite network-wait-test
     , retry
     , tasty
     , tasty-hunit
+  if flag(postgres)
+    build-depends:
+        postgresql-simple
   default-language: Haskell2010
