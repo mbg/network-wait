@@ -13,14 +13,20 @@
 -- to start out with e.g. `waitTcp` or `waitSocket` initially and move
 -- on to the more feature-rich variants if you need their functionality.
 module Network.Wait (
+    -- * TCP
     waitTcp,
     waitTcpVerbose,
     waitTcpVerboseFormat,
     waitTcpWith,
+
+    -- * Sockets
     waitSocket,
     waitSocketVerbose,
     waitSocketVerboseFormat,
-    waitSocketWith
+    waitSocketWith,
+
+    -- * Utility
+    recoveringWith
 ) where
 
 -------------------------------------------------------------------------------
@@ -130,10 +136,7 @@ waitSocketWith
     :: (MonadIO m, MonadMask m)
     => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> AddrInfo -> m ()
 waitSocketWith hs policy addr =
-    -- apply the retry policy to the following code, with the combinations of
-    -- the `skipAsyncExceptions`, given, and default handlers. The order of
-    -- the handlers matters as they are checked in order.
-    recovering policy (skipAsyncExceptions <> hs <> [defHandler])$ \_ ->
+    recoveringWith hs policy $
     -- all of the networking code runs in IO
     liftIO $
     -- we want to make sure that we close the socket after every attempt;
@@ -143,6 +146,28 @@ waitSocketWith hs policy addr =
     where
         initSocket =
             socket (addrFamily addr) (addrSocketType addr) (addrProtocol addr)
+
+-- | `recoveringWith` @extraHandlers retryPolicy action@ will attempt to
+-- run @action@. If the @action@ fails, @retryPolicy@ is used
+-- to determine whether (and how often) this function should attempt to
+-- retry @action@. By default, this function will retry after all
+-- exceptions (except for those given by `skipAsyncExceptions`). This
+-- behaviour may be customised with @extraHandlers@ which are installed
+-- after `skipAsyncExceptions`, but before the default exception handler.
+-- The @extraHandlers@ may also be used to report retry attempts to e.g.
+-- the standard output or a logger.
+recoveringWith
+    :: (MonadIO m, MonadMask m)
+    => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> m () -> m ()
+recoveringWith hs policy action =
+    -- apply the retry policy to the following code, with the combinations of
+    -- the `skipAsyncExceptions`, given, and default handlers. The order of
+    -- the handlers matters as they are checked in order.
+    recovering policy (skipAsyncExceptions <> hs <> [defHandler]) $
+    -- we want to make sure that we close the socket after every attempt;
+    -- `bracket` will re-throw any error afterwards
+        const action
+    where
         -- our default handler, which works with any exception derived from
         -- `SomeException`, and signals that we should retry if allowed by
         -- the retry policy
