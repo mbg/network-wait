@@ -18,6 +18,25 @@ main = do
 
 The haddock documentation for this library contains more examples.
 
+## Example: PostgreSQL
+
+The `network-wait` package can be compiled with the `network-wait:postgres` flag (e.g. `stack build --flag network-wait:postgres`) which enables support for checking the readiness of PostgreSQL servers specifically. Unlike the functions in the `Network.Wait` module, which only check that connections can be established, the functions in `Network.Wait.PostgreSQL` also check that a PostgreSQL server is ready to accept commands. To wait for a PostgreSQL server to become available and accept commands:
+
+```haskell
+import Control.Retry (retryPolicyDefault)
+import Database.PostgreSQL.Simple (defaultConnectInfo)
+import Network.Wait.PostgreSQL (waitPostgreSQL)
+
+main :: IO ()
+main = do
+    waitPostgreSQL retryPolicyDefault defaultConnectInfo
+    putStrLn "Yay, the PostgreSQL server is ready to accept commands!"
+```
+
+Internally, this uses `postgresql-simple` to connect to the specified server (`defaultConnectInfo` in the example above) and send a `SELECT 1;` query. If the query is answered correctly, we consider the server to be in a state ready to accept commands.
+
+The `Network.Wait.PostgreSQL` module is gated behind the `network-wait:postgres` flag so that the PostgreSQL-specific dependencies are only required when PostgresSQL support is required by users of this library.
+
 ## See also
 
 - [wait-for](https://github.com/eficode/wait-for) is a popular shell script with the same objectives as this library.
