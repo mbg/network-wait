@@ -3,6 +3,7 @@
 -- Copyright 2022 Michael B. Gale (github@michael-gale.co.uk)
 -------------------------------------------------------------------------------
 
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 
