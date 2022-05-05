@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           network-wait
-version:        0.1.1.0
+version:        0.1.2.0
 synopsis:       Lightweight library for waiting on networked services to become available.
 description:    Please see the README on GitHub at <https://github.com/mbg/network-wait#readme>
 category:       Network
