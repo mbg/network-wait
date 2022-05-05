@@ -17,30 +17,30 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
-        include:
-          - resolver: "stack-lts18"
-            ghc-version: "8.10.7"
-            cabal-flags: ""
-          - resolver: "stack-lts18"
-            ghc-version: "8.10.7"
-            cabal-flags: "--flag network-wait:postgres"
+        resolver:
+          - "stack-lts11"
+          - "stack-lts18"
+        postgres-flag:
+          - ""
+          - "--flag network-wait:postgres"
 
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: haskell/actions/setup@v1
+      - uses: haskell/actions/setup@v2
         id: install-haskell
         with:
-          ghc-version: ${{ matrix.ghc-version }}
           enable-stack: true
           stack-version: "latest"
+          stack-no-global: true
 
       - name: Write flags to file (for hashing)
         run: |
-          echo ${{ matrix.cabal-flags }} > .cabal-flags
+          echo ${{ matrix.postgres-flag }} > .cabal-flags
           cat .cabal-flags
 
       - name: Cache .stack
@@ -53,24 +53,23 @@ jobs:
             ${{ runner.os }}-${{ matrix.resolver }}-${{ hashFiles(format('{0}.yaml', matrix.resolver)) }}-${{ hashFiles('*.cabal') }}-
             ${{ runner.os }}-${{ matrix.resolver }}-${{ hashFiles(format('{0}.yaml', matrix.resolver)) }}-
             ${{ runner.os }}-${{ matrix.resolver }}-
-            ${{ runner.os }}-
 
       - name: Install dependencies
-        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build ${{ matrix.cabal-flags }} --only-dependencies --test --haddock --fast
+        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build ${{ matrix.postgres-flag }} --only-dependencies --test --haddock --fast
 
       - name: Build
         id: build
-        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build ${{ matrix.cabal-flags }} --fast --test --no-run-tests
+        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build ${{ matrix.postgres-flag }} --fast --test --no-run-tests
 
       - name: Start Docker containers (PostgreSQL)
-        if: ${{ contains(matrix.cabal-flags, 'network-wait:postgres') }}
+        if: ${{ contains(matrix.postgres-flag, 'network-wait:postgres') }}
         run: |
           docker-compose -f docker-compose.postgresql.yaml up -d
 
       - name: Test
-        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build ${{ matrix.cabal-flags }} --fast --test
+        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build ${{ matrix.postgres-flag }} --fast --test
 
       - name: Stop Docker containers (PostgreSQL)
-        if: ${{ contains(matrix.cabal-flags, 'network-wait:postgres') }}
+        if: ${{ contains(matrix.postgres-flag, 'network-wait:postgres') }}
         run: |
           docker-compose -f docker-compose.postgresql.yaml down
