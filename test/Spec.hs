@@ -8,6 +8,8 @@
 import Control.Concurrent
 import Control.Monad.Catch
 import Control.Retry
+-- Only needed for base < 4.11, redundant otherwise
+import Data.Semigroup
 
 import Test.Tasty
 import Test.Tasty.HUnit

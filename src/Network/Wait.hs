@@ -34,6 +34,8 @@ module Network.Wait (
 import Control.Monad.Catch
 import Control.Monad.IO.Class
 import Control.Retry
+-- Only needed for base < 4.11, redundant otherwise
+import Data.Semigroup
 
 import Network.Socket
 
