@@ -3,10 +3,13 @@
 -- Copyright 2022 Michael B. Gale (github@michael-gale.co.uk)
 -------------------------------------------------------------------------------
 
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 {-# LANGUAGE TypeApplications #-}
 
 import Control.Monad.Catch
 import Control.Retry
+-- Only needed for base < 4.11, redundant otherwise
+import Data.Semigroup
 
 import Database.PostgreSQL.Simple
 
@@ -17,11 +20,16 @@ import Network.Wait.PostgreSQL
 
 -------------------------------------------------------------------------------
 
+-- | Essentially the same as `retryPolicyDefault`, but here for compatibility
+-- with older versions of `retry`.
+testRetryPolicy :: Monad m => RetryPolicyM m
+testRetryPolicy = constantDelay 50000 <> limitRetries 5
+
 tests :: TestTree
 tests = testGroup "Network.Wait.PostgreSQL"
     [ testCase "Can't connect to server that doesn't exist" $ do
         res <- try @IO @SomeException $
-            waitPostgreSql retryPolicyDefault defaultConnectInfo{
+            waitPostgreSql testRetryPolicy defaultConnectInfo{
                 connectHost = "doesnotexist"
             }
 

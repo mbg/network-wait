@@ -20,6 +20,11 @@ import Network.Wait
 
 -------------------------------------------------------------------------------
 
+-- | Essentially the same as `retryPolicyDefault`, but here for compatibility
+-- with older versions of `retry`.
+testRetryPolicy :: Monad m => RetryPolicyM m
+testRetryPolicy = constantDelay 50000 <> limitRetries 5
+
 -- | `withServer` @delay action@ runs @action@ while asynchronously setting up
 -- a TCP server on @localhost:5999@ with a @delay@ microseconds delay. The TCP
 -- server will accept exactly one connection before shutting down.
@@ -47,7 +52,7 @@ tests :: TestTree
 tests = testGroup "network-wait"
     [ testCase "Can't connect to service that doesn't exist" $ do
         res <- try @IO @SomeException $
-            waitTcp retryPolicyDefault "localhost" "5999"
+            waitTcp testRetryPolicy "localhost" "5999"
 
         case res of
             Left _ -> pure ()
@@ -55,7 +60,7 @@ tests = testGroup "network-wait"
     , testCase "Can connect to service that does exist" $
         withServer 0 $ do
             res <- try @IO @SomeException $
-                waitTcp retryPolicyDefault "localhost" "5999"
+                waitTcp testRetryPolicy "localhost" "5999"
 
             case res of
                 Left ex -> assertFailure $
