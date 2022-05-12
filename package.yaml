@@ -72,3 +72,16 @@ tests:
         buildable: true
       else:
         buildable: false
+  network-wait-test-redis:
+    main: Spec.hs
+    source-dirs: test-redis
+    dependencies:
+      - network-wait
+      - tasty
+      - tasty-hunit
+    when:
+      condition: flag(redis)
+      then:
+        buildable: true
+      else:
+        buildable: false
