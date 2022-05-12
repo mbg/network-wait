@@ -10,6 +10,7 @@ on:
       - ".github/workflows/**"
       - "src/**"
       - "test/**"
+      - "test-postgres/**"
       - "package.yaml"
       - "stack*.yaml"
   pull_request:
