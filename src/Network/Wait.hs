@@ -161,7 +161,7 @@ waitSocketWith hs policy addr =
 -- the standard output or a logger.
 recoveringWith
     :: (MonadIO m, MonadMask m)
-    => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> m () -> m ()
+    => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> m a -> m a
 recoveringWith hs policy action =
     -- apply the retry policy to the following code, with the combinations of
     -- the `skipAsyncExceptions`, given, and default handlers. The order of
