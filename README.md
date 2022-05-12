@@ -37,6 +37,25 @@ Internally, this uses `postgresql-simple` to connect to the specified server (`d
 
 The `Network.Wait.PostgreSQL` module is gated behind the `network-wait:postgres` flag so that the PostgreSQL-specific dependencies are only required when PostgresSQL support is required by users of this library.
 
+## Example: Redis
+
+The `network-wait` package can be compiled with the `network-wait:redis` flag (e.g. `stack build --flag network-wait:redis`) which enables support for checking the readiness of Redis servers specifically. Unlike the functions in the `Network.Wait` module, which only check that connections can be established, the functions in `Network.Wait.Redis` also check that a Redis server is ready to accept commands. To wait for a Redis server to become available and accept commands:
+
+```haskell
+import Control.Retry (retryPolicyDefault)
+import Database.Redis (defaultConnectInfo)
+import Network.Wait.Redis (waitRedis)
+
+main :: IO ()
+main = do
+    waitRedis retryPolicyDefault defaultConnectInfo
+    putStrLn "Yay, the Redis server is ready to accept commands!"
+```
+
+Internally, this uses `hedis` to connect to the specified server (`defaultConnectInfo` in the example above) and send a ping. If the ping is answered, we consider the server to be in a state ready to accept commands.
+
+The `Network.Wait.Redis` module is gated behind the `network-wait:redis` flag so that the Redis-specific dependencies are only required when Redis support is required by users of this library.
+
 ## See also
 
 - [wait-for](https://github.com/eficode/wait-for) is a popular shell script with the same objectives as this library.
