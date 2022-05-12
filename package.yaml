@@ -26,11 +26,18 @@ flags:
     description: Enable Postgres support.
     manual: true
     default: false
+  redis:
+    description: Enable Redis support.
+    manual: true
+    default: false
 
 when:
-  condition: flag(postgres)
-  dependencies:
-    - postgresql-simple
+  - condition: flag(postgres)
+    dependencies:
+      - postgresql-simple
+  - condition: flag(redis)
+    dependencies:
+      - hedis
 
 ghc-options:
   - -Wall
@@ -38,8 +45,10 @@ ghc-options:
 library:
   source-dirs: src
   when:
-    condition: flag(postgres)
-    exposed-modules: Network.Wait.PostgreSQL
+    - condition: flag(postgres)
+      exposed-modules: Network.Wait.PostgreSQL
+    - condition: flag(redis)
+      exposed-modules: Network.Wait.Redis
 
 tests:
   network-wait-test:
