@@ -73,7 +73,18 @@ jobs:
           stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build \
             ${{ matrix.postgres-flag }} \
             ${{ matrix.redis-flag }} \
-            --fast --test --no-run-tests
+            --fast --test --haddock --no-run-tests
+
+      - name: Deploy documentation
+        # only deploy the documentation for a build on `main` with all flags enabled
+        if: |
+          github.ref == 'refs/heads/main' &&
+          contains(matrix.postgres-flag, 'network-wait:postgres') &&
+          contains(matrix.redis-flag, 'network-wait:redis')
+        uses: JamesIves/github-pages-deploy-action@v4.2.5
+        with:
+          branch: docs/${{ github.ref_name }}
+          folder: docs
 
       - name: Start Docker containers (PostgreSQL)
         if: ${{ contains(matrix.postgres-flag, 'network-wait:postgres') }}
