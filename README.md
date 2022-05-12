@@ -6,6 +6,8 @@
 
 A lightweight Haskell library for waiting on networked services to become available. This is useful if you are e.g. building a web application which relies on a database server to be available, but which may not be immediately available on application startup.
 
+[**Full Haddock documentation for all modules**](https://mbg.github.io/network-wait/)
+
 ## Example
 
 All functions provided by this library work with retry policies from [`Control.Retry`](https://hackage.haskell.org/package/retry) which provide good control over the retry behaviour. To wait for a PostgreSQL server to become available on the same machine:

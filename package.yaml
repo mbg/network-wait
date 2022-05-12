@@ -13,7 +13,10 @@ extra-source-files:
 synopsis: Lightweight library for waiting on networked services to become available.
 category: Network
 
-description: Please see the README on GitHub at <https://github.com/mbg/network-wait#readme>
+description: |
+  Please see the README on GitHub at <https://github.com/mbg/network-wait#readme> and
+  Haddock documentation for all modules, including those that are gated behind
+  package flags, at <https://mbg.github.io/network-wait/>
 
 dependencies:
   - base >= 4.7 && < 5

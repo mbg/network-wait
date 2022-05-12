@@ -7,7 +7,9 @@ cabal-version: 1.12
 name:           network-wait
 version:        0.2.0.0
 synopsis:       Lightweight library for waiting on networked services to become available.
-description:    Please see the README on GitHub at <https://github.com/mbg/network-wait#readme>
+description:    Please see the README on GitHub at <https://github.com/mbg/network-wait#readme> and
+                Haddock documentation for all modules, including those that are gated behind
+                package flags, at <https://mbg.github.io/network-wait/>
 category:       Network
 homepage:       https://github.com/mbg/network-wait#readme
 bug-reports:    https://github.com/mbg/network-wait/issues
