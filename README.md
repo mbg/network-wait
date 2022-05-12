@@ -1,5 +1,9 @@
 # network-wait
 
+![MIT](https://img.shields.io/github/license/mbg/network-wait)
+![CI](https://github.com/mbg/network-wait/workflows/build/badge.svg?branch=main)
+[![Hackage](https://img.shields.io/hackage/v/network-wait)](https://hackage.haskell.org/package/network-wait)
+
 A lightweight Haskell library for waiting on networked services to become available. This is useful if you are e.g. building a web application which relies on a database server to be available, but which may not be immediately available on application startup.
 
 ## Example
