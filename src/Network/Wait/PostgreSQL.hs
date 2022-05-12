@@ -36,7 +36,7 @@ import Network.Wait
 -- `waitPostgresWith` which does not install any additional handlers.
 waitPostgreSql
     :: (MonadIO m, MonadMask m)
-    => RetryPolicyM m -> ConnectInfo -> m ()
+    => RetryPolicyM m -> ConnectInfo -> m Connection
 waitPostgreSql = waitPostgreSqlWith []
 
 -- | `waitPostgreSqlVerbose` @outputHandler retryPolicy connectInfo@ is a variant
@@ -45,7 +45,7 @@ waitPostgreSql = waitPostgreSqlWith []
 -- before passing the resulting `String` to @out@.
 waitPostgreSqlVerbose
     :: (MonadIO m, MonadMask m)
-    => (String -> m ()) -> RetryPolicyM m -> ConnectInfo -> m ()
+    => (String -> m ()) -> RetryPolicyM m -> ConnectInfo -> m Connection
 waitPostgreSqlVerbose out =
     waitPostgreSqlVerboseFormat @SomeException $
     \b ex st -> out $ defaultLogMsg b ex st
@@ -59,7 +59,7 @@ waitPostgreSqlVerboseFormat
     => (Bool -> e -> RetryStatus -> m ())
     -> RetryPolicyM m
     -> ConnectInfo
-    -> m ()
+    -> m Connection
 waitPostgreSqlVerboseFormat out = waitPostgreSqlWith [h]
     where h = logRetries (const $ pure True) out
 
@@ -75,7 +75,8 @@ waitPostgreSqlVerboseFormat out = waitPostgreSqlWith [h]
 -- standard output or a logger.
 waitPostgreSqlWith
     :: (MonadIO m, MonadMask m)
-    => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> ConnectInfo -> m ()
+    => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> ConnectInfo
+    -> m Connection
 waitPostgreSqlWith hs policy info =
     recoveringWith hs policy $
     liftIO $
@@ -83,5 +84,6 @@ waitPostgreSqlWith hs policy info =
         rs <- query_ @[Int] con "SELECT 1;"
         unless (rs == [[1]]) $ throwM $
             fatalError "Unexpected result for SELECT 1."
+        pure con
 
 -------------------------------------------------------------------------------
