@@ -2,4 +2,9 @@ resolver:
   url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/26.yaml
 
 packages:
-- .
+  - .
+
+build:
+  haddock-arguments:
+    haddock-args:
+      - "--odir=./docs"
