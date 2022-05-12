@@ -48,7 +48,7 @@ import Network.Socket
 -- > waitTcp retryPolicyDefault "localhost" "80"
 waitTcp
     :: (MonadIO m, MonadMask m)
-    => RetryPolicyM m -> HostName -> ServiceName -> m ()
+    => RetryPolicyM m -> HostName -> ServiceName -> m Socket
 waitTcp = waitTcpWith []
 
 -- | `waitTcpVerbose` @outputHandler retryPolicy addrInfo@ is a variant
@@ -59,7 +59,8 @@ waitTcp = waitTcpWith []
 -- > waitTcpVerbose putStrLn retryPolicyDefault "localhost" "80"
 waitTcpVerbose
     :: (MonadIO m, MonadMask m)
-    => (String -> m ()) -> RetryPolicyM m -> HostName -> ServiceName -> m ()
+    => (String -> m ()) -> RetryPolicyM m -> HostName -> ServiceName
+    -> m Socket
 waitTcpVerbose out =
     waitTcpVerboseFormat @SomeException $
     \b ex st -> out $ defaultLogMsg b ex st
@@ -78,7 +79,7 @@ waitTcpVerboseFormat
     -> RetryPolicyM m
     -> HostName
     -> ServiceName
-    -> m ()
+    -> m Socket
 waitTcpVerboseFormat out = waitTcpWith [h]
     where h = logRetries (const $ pure True) out
 
@@ -88,7 +89,7 @@ waitTcpVerboseFormat out = waitTcpWith [h]
 waitTcpWith
     :: (MonadIO m, MonadMask m)
     => [RetryStatus -> Handler m Bool]
-    -> RetryPolicyM m -> HostName -> ServiceName -> m ()
+    -> RetryPolicyM m -> HostName -> ServiceName -> m Socket
 waitTcpWith hs policy host port = do
     let hints = defaultHints { addrSocketType = Stream }
     addr <- head <$> liftIO (getAddrInfo (Just hints) (Just host) (Just port))
@@ -98,7 +99,7 @@ waitTcpWith hs policy host port = do
 -- does not install any additional exception handlers.
 waitSocket
     :: (MonadIO m, MonadMask m)
-    => RetryPolicyM m -> AddrInfo -> m ()
+    => RetryPolicyM m -> AddrInfo -> m Socket
 waitSocket = waitSocketWith []
 
 -- | `waitSocketVerbose` @outputHandler retryPolicy addrInfo@ is a variant
@@ -107,7 +108,7 @@ waitSocket = waitSocketWith []
 -- before passing the resulting `String` to @out@.
 waitSocketVerbose
     :: (MonadIO m, MonadMask m)
-    => (String -> m ()) -> RetryPolicyM m -> AddrInfo -> m ()
+    => (String -> m ()) -> RetryPolicyM m -> AddrInfo -> m Socket
 waitSocketVerbose out =
     waitSocketVerboseFormat @SomeException $
     \b ex st -> out $ defaultLogMsg b ex st
@@ -121,7 +122,7 @@ waitSocketVerboseFormat
     => (Bool -> e -> RetryStatus -> m ())
     -> RetryPolicyM m
     -> AddrInfo
-    -> m ()
+    -> m Socket
 waitSocketVerboseFormat out = waitSocketWith [h]
     where h = logRetries (const $ pure True) out
 
@@ -137,7 +138,8 @@ waitSocketVerboseFormat out = waitSocketWith [h]
 -- logger.
 waitSocketWith
     :: (MonadIO m, MonadMask m)
-    => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> AddrInfo -> m ()
+    => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> AddrInfo
+    -> m Socket
 waitSocketWith hs policy addr =
     recoveringWith hs policy $
     -- all of the networking code runs in IO
@@ -145,7 +147,7 @@ waitSocketWith hs policy addr =
     -- we want to make sure that we close the socket after every attempt;
     -- `bracket` will re-throw any error afterwards
     bracket initSocket close $
-        \sock -> connect sock (addrAddress addr)
+        \sock -> connect sock (addrAddress addr) >> pure sock
     where
         initSocket =
             socket (addrFamily addr) (addrSocketType addr) (addrProtocol addr)
