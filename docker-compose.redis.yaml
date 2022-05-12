@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  redis:
+    image: redis:7-alpine3.15
+    ports:
+      - 6379:6379
+    networks:
+      - redis-network
+
+networks:
+  redis-network:

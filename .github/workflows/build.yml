@@ -11,6 +11,7 @@ on:
       - "src/**"
       - "test/**"
       - "test-postgres/**"
+      - "test-redis/**"
       - "package.yaml"
       - "stack*.yaml"
   pull_request:
@@ -26,6 +27,9 @@ jobs:
         postgres-flag:
           - ""
           - "--flag network-wait:postgres"
+        redis-flag:
+          - ""
+          - "--flag network-wait:redis"
 
     runs-on: ubuntu-latest
 
@@ -42,6 +46,7 @@ jobs:
       - name: Write flags to file (for hashing)
         run: |
           echo ${{ matrix.postgres-flag }} > .cabal-flags
+          echo ${{ matrix.redis-flag }} >> .cabal-flags
           cat .cabal-flags
 
       - name: Cache .stack
@@ -56,21 +61,43 @@ jobs:
             ${{ runner.os }}-${{ matrix.resolver }}-
 
       - name: Install dependencies
-        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build ${{ matrix.postgres-flag }} --only-dependencies --test --haddock --fast
+        run: |
+          stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build \
+            ${{ matrix.postgres-flag }} \
+            ${{ matrix.redis-flag }} \
+            --only-dependencies --test --haddock --fast
 
       - name: Build
         id: build
-        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build ${{ matrix.postgres-flag }} --fast --test --no-run-tests
+        run: |
+          stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build \
+            ${{ matrix.postgres-flag }} \
+            ${{ matrix.redis-flag }} \
+            --fast --test --no-run-tests
 
       - name: Start Docker containers (PostgreSQL)
         if: ${{ contains(matrix.postgres-flag, 'network-wait:postgres') }}
         run: |
-          docker-compose -f docker-compose.postgresql.yaml up -d
+          docker-compose -p postgres -f docker-compose.postgresql.yaml up -d
+
+      - name: Start Docker containers (Redis)
+        if: ${{ contains(matrix.redis-flag, 'network-wait:redis') }}
+        run: |
+          docker-compose -p redis -f docker-compose.redis.yaml up -d
 
       - name: Test
-        run: stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build ${{ matrix.postgres-flag }} --fast --test
+        run: |
+          stack --system-ghc --stack-yaml=${{ matrix.resolver }}.yaml --no-terminal build \
+            ${{ matrix.postgres-flag }} \
+            ${{ matrix.redis-flag }} \
+            --fast --test
 
       - name: Stop Docker containers (PostgreSQL)
         if: ${{ contains(matrix.postgres-flag, 'network-wait:postgres') }}
         run: |
-          docker-compose -f docker-compose.postgresql.yaml down
+          docker-compose -p postgres -f docker-compose.postgresql.yaml down
+
+      - name: Stop Docker containers (Redis)
+        if: ${{ contains(matrix.redis-flag, 'network-wait:redis') }}
+        run: |
+          docker-compose -p redis -f docker-compose.redis.yaml down

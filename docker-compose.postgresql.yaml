@@ -14,3 +14,8 @@ services:
       start_period: 30s
     ports:
       - 5432:5432
+    networks:
+      - postgres-network
+
+networks:
+  postgres-network:
