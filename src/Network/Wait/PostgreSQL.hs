@@ -78,7 +78,7 @@ waitPostgreSqlWith
     => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> ConnectInfo
     -> m Connection
 waitPostgreSqlWith hs policy info =
-    recoveringWith hs policy $
+    recoveringWith hs policy $ \_ ->
     liftIO $
     bracket (connect info) close $ \con -> do
         rs <- query_ @[Int] con "SELECT 1;"
