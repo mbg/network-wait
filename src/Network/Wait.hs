@@ -4,8 +4,6 @@
 -------------------------------------------------------------------------------
 
 {-# OPTIONS_GHC -Wno-unused-imports #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -65,7 +63,7 @@ import Network.Socket
 -- timeouts, so this is extra conservative:
 -- https://github.com/eficode/wait-for/blob/7586b3622f010808bb2027c19aaf367221b4ad54/wait-for#L72
 connectRetryPolicy :: MonadIO m => RetryPolicyM m
-connectRetryPolicy = capDelay (3_000_000) (fullJitterBackoff 100_000)
+connectRetryPolicy = capDelay (3000000) (fullJitterBackoff 100000)
 
 -- | `waitTcp` @retryPolicy hostName serviceName@ is a variant of `waitTcpWith`
 -- which does not install any additional handlers.
@@ -172,11 +170,13 @@ waitSocketWith hs policy addr =
     -- we want to make sure that we close the socket after every attempt;
     -- `bracket` will re-throw any error afterwards
     bracket initSocket close $ \sock -> do
-        connectTimeoutUs <- (getRetryPolicyM connectRetryPolicy) retryStatus >>= \case
+        maybeConnectTimeoutUs <- (getRetryPolicyM connectRetryPolicy) retryStatus
+        connectTimeoutUs <- case maybeConnectTimeoutUs of
             Nothing -> throwIO $ userError "Timeout in connect attempt"
             Just us -> pure us
 
-        timeout connectTimeoutUs (connect sock (addrAddress addr)) >>= \case
+        maybeResult <- timeout connectTimeoutUs (connect sock (addrAddress addr))
+        case maybeResult of
             Nothing -> throwIO $ userError "Timeout in connect attempt"
             Just () -> pure sock
     where
