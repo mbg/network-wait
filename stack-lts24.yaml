@@ -1,0 +1,10 @@
+snapshot:
+  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/24/2.yaml
+
+packages:
+  - .
+
+build:
+  haddock-arguments:
+    haddock-args:
+      - "--odir=./docs"
