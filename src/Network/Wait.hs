@@ -27,7 +27,8 @@ module Network.Wait (
     waitSocketWith,
 
     -- * Utility
-    recoveringWith
+    recoveringWith,
+    recoveringWithStatus
 ) where
 
 -------------------------------------------------------------------------------
@@ -164,7 +165,7 @@ waitSocketWith
     => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> AddrInfo
     -> m Socket
 waitSocketWith hs policy addr =
-    recoveringWith hs policy $ \retryStatus ->
+    recoveringWithStatus hs policy $ \retryStatus ->
     -- all of the networking code runs in IO
     liftIO $
     -- we want to make sure that we close the socket after every attempt;
@@ -194,8 +195,28 @@ waitSocketWith hs policy addr =
 -- the standard output or a logger.
 recoveringWith
     :: (MonadIO m, MonadMask m)
-    => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> (RetryStatus -> m a) -> m a
-recoveringWith hs policy action =
+    => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> m a -> m a
+recoveringWith hs policy =
+    recoveringWithStatus hs policy . const
+
+
+-- | `recoveringWithStatus` @extraHandlers retryPolicy action@ will attempt to
+-- run @action@. If the @action@ fails, @retryPolicy@ is used
+-- to determine whether (and how often) this function should attempt to
+-- retry @action@. The `RetryStatus` is given to @action@ as argument.
+-- By default, this function will retry after all
+-- exceptions (except for those given by `skipAsyncExceptions`). This
+-- behaviour may be customised with @extraHandlers@ which are installed
+-- after `skipAsyncExceptions`, but before the default exception handler.
+-- The @extraHandlers@ may also be used to report retry attempts to e.g.
+-- the standard output or a logger.
+recoveringWithStatus
+    :: (MonadIO m, MonadMask m)
+    => [RetryStatus -> Handler m Bool]
+    -> RetryPolicyM m
+    -> (RetryStatus -> m a)
+    -> m a
+recoveringWithStatus hs policy action =
     -- apply the retry policy to the following code, with the combinations of
     -- the `skipAsyncExceptions`, given, and default handlers. The order of
     -- the handlers matters as they are checked in order.
