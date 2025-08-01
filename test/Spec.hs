@@ -57,6 +57,13 @@ tests = testGroup "network-wait"
         case res of
             Left _ -> pure ()
             Right _ -> assertFailure "`waitTcp` did not fail"
+    , localOption (mkTimeout $ 10*1000*1000) $ testCase "Can't connect to non-routable private IP" $ do
+        res <- try @IO @SomeException $
+            waitTcp testRetryPolicy "10.255.255.1" "80"
+
+        case res of
+            Left _ -> pure ()
+            Right _ -> assertFailure "`waitTcp` did not fail"
     , testCase "Can connect to service that does exist" $
         withServer 0 $ do
             res <- try @IO @SomeException $

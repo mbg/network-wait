@@ -79,6 +79,6 @@ waitRedisWith
     :: (MonadIO m, MonadMask m)
     => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> ConnectInfo
     -> m Connection
-waitRedisWith hs policy = recoveringWith hs policy . liftIO . checkedConnect
+waitRedisWith hs policy = recoveringWith hs policy . const . liftIO . checkedConnect
 
 -------------------------------------------------------------------------------
