@@ -12,6 +12,7 @@
 -- connection can be established, the functions in this module also check
 -- whether the PostgreSQL server is ready to accept commands.
 module Network.Wait.PostgreSQL (
+    PostgreSqlConnectInfo(..),
     waitPostgreSql,
     waitPostgreSqlVerbose,
     waitPostgreSqlVerboseFormat,
@@ -19,6 +20,8 @@ module Network.Wait.PostgreSQL (
 ) where
 
 -------------------------------------------------------------------------------
+
+import Data.ByteString ( ByteString )
 
 import Control.Monad
 import Control.Monad.Catch
@@ -32,11 +35,23 @@ import Network.Wait
 
 -------------------------------------------------------------------------------
 
+-- | Used to abstract over different ways to describe a database connection.
+class PostgreSqlConnectInfo a where
+    -- | `connectDb` @info@ attempts to establish a database connection using
+    -- a configuration given by @info@.
+    connectDb :: a -> IO Connection
+
+instance PostgreSqlConnectInfo ConnectInfo where
+    connectDb = connect
+
+instance PostgreSqlConnectInfo ByteString where
+    connectDb = connectPostgreSQL
+
 -- | `waitPostgreSql` @retryPolicy connectInfo@ is a variant of
 -- `waitPostgresWith` which does not install any additional handlers.
 waitPostgreSql
-    :: (MonadIO m, MonadMask m)
-    => RetryPolicyM m -> ConnectInfo -> m Connection
+    :: (MonadIO m, MonadMask m, PostgreSqlConnectInfo info)
+    => RetryPolicyM m -> info -> m Connection
 waitPostgreSql = waitPostgreSqlWith []
 
 -- | `waitPostgreSqlVerbose` @outputHandler retryPolicy connectInfo@ is a variant
@@ -44,8 +59,8 @@ waitPostgreSql = waitPostgreSqlWith []
 -- `SomeException` and formats retry attempt information using `defaultLogMsg`
 -- before passing the resulting `String` to @out@.
 waitPostgreSqlVerbose
-    :: (MonadIO m, MonadMask m)
-    => (String -> m ()) -> RetryPolicyM m -> ConnectInfo -> m Connection
+    :: (MonadIO m, MonadMask m, PostgreSqlConnectInfo info)
+    => (String -> m ()) -> RetryPolicyM m -> info -> m Connection
 waitPostgreSqlVerbose out =
     waitPostgreSqlVerboseFormat @SomeException $
     \b ex st -> out $ defaultLogMsg b ex st
@@ -55,10 +70,10 @@ waitPostgreSqlVerbose out =
 -- `logRetries` which passes status information for each retry attempt
 -- to @outputHandler@.
 waitPostgreSqlVerboseFormat
-    :: forall e m . (MonadIO m, MonadMask m, Exception e)
+    :: forall e m info. (MonadIO m, MonadMask m, PostgreSqlConnectInfo info, Exception e)
     => (Bool -> e -> RetryStatus -> m ())
     -> RetryPolicyM m
-    -> ConnectInfo
+    -> info
     -> m Connection
 waitPostgreSqlVerboseFormat out = waitPostgreSqlWith [h]
     where h = logRetries (const $ pure True) out
@@ -74,13 +89,13 @@ waitPostgreSqlVerboseFormat out = waitPostgreSqlWith [h]
 --  @extraHandlers@ may also be used to report retry attempts to e.g. the
 -- standard output or a logger.
 waitPostgreSqlWith
-    :: (MonadIO m, MonadMask m)
-    => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> ConnectInfo
+    :: (MonadIO m, MonadMask m, PostgreSqlConnectInfo info)
+    => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> info
     -> m Connection
 waitPostgreSqlWith hs policy info =
     recoveringWith hs policy $
     liftIO $
-    bracket (connect info) close $ \con -> do
+    bracket (connectDb info) close $ \con -> do
         rs <- query_ @[Int] con "SELECT 1;"
         unless (rs == [[1]]) $ throwM $
             fatalError "Unexpected result for SELECT 1."
