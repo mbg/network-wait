@@ -35,7 +35,7 @@ jobs:
 
       - name: Publish `network-wait`
         if: startsWith(github.ref, 'refs/tags/v') && github.event.action == 'released'
-        run: stack upload .
+        run: stack upload . --candidate
         env:
           HACKAGE_USERNAME: ${{ secrets.HACKAGE_USER }}
           HACKAGE_PASSWORD: ${{ secrets.HACKAGE_PASSWORD }}
