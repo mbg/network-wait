@@ -98,7 +98,7 @@ waitSocketWith :: (MonadIO m, MonadMask m) => [RetryStatus -> Handler m Bool] ->
 --   <a>skipAsyncExceptions</a>, but before the default exception handler.
 --   The <tt>extraHandlers</tt> may also be used to report retry attempts
 --   to e.g. the standard output or a logger.
-recoveringWith :: (MonadIO m, MonadMask m) => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> m a -> m a
+recoveringWith :: (MonadIO m, MonadMask m) => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> (RetryStatus -> m a) -> m a
 
 
 -- | This module exports variants of the functions from <a>Network.Wait</a>
