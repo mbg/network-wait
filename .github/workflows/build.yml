@@ -86,7 +86,7 @@ jobs:
         # only deploy the documentation for a build on `main` with all flags enabled
         if: |
           github.ref == 'refs/heads/main' &&
-          matrix.resolver == 'stack-lts18' &&
+          matrix.resolver == 'stack-lts24' &&
           contains(matrix.postgres-flag, 'network-wait:postgres') &&
           contains(matrix.redis-flag, 'network-wait:redis')
         uses: JamesIves/github-pages-deploy-action@v4.6.0
