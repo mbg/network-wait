@@ -1,5 +1,10 @@
 # Changelog for network-wait
 
+## 0.4.0
+
+- Fixed [an issue](https://github.com/mbg/network-wait/issues/19) where under some circumstances an attempt to connect to a socket could become stuck for a long time or possibly forever. A timeout is now applied to all connection attempts made by functions in the `Network.Wait` module to ensure that the checks terminate in a reasonable amount of time. Contributed by [@thomasjm](https://github.com/thomasjm) in [#20](https://github.com/mbg/network-wait/pull/20).
+- Added a new `recoveringWithStatus` function which provides the `RetryStatus` to the action.
+
 ## 0.3.0
 
 - Functions in the `Network.Wait.PostgreSQL` module are now overloaded to accept different types of connection information. In addition to the previously supported `ConnectInfo` type, the function now also accept connection strings in the form of `ByteString` values.
