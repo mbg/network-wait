@@ -146,8 +146,8 @@ waitPostgreSqlVerboseFormat :: forall e m info. (MonadIO m, MonadMask m, Postgre
 --   The <tt>extraHandlers</tt> may also be used to report retry attempts
 --   to e.g. the standard output or a logger.
 waitPostgreSqlWith :: (MonadIO m, MonadMask m, PostgreSqlConnectInfo info) => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> info -> m Connection
+instance Network.Wait.PostgreSQL.PostgreSqlConnectInfo Data.ByteString.Internal.Type.ByteString
 instance Network.Wait.PostgreSQL.PostgreSqlConnectInfo Database.PostgreSQL.Simple.Internal.ConnectInfo
-instance Network.Wait.PostgreSQL.PostgreSqlConnectInfo Data.ByteString.Internal.ByteString
 
 
 -- | This module exports variants of the functions from <a>Network.Wait</a>
