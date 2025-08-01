@@ -21,6 +21,8 @@ module Network.Wait.PostgreSQL (
 
 -------------------------------------------------------------------------------
 
+import Data.ByteString ( ByteString )
+
 import Control.Monad
 import Control.Monad.Catch
 import Control.Monad.IO.Class
@@ -41,6 +43,9 @@ class PostgreSqlConnectInfo a where
 
 instance PostgreSqlConnectInfo ConnectInfo where
     connectDb = connect
+
+instance PostgreSqlConnectInfo ByteString where
+    connectDb = connectPostgreSQL
 
 -- | `waitPostgreSql` @retryPolicy connectInfo@ is a variant of
 -- `waitPostgresWith` which does not install any additional handlers.

@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.38.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -47,9 +47,11 @@ library
   ghc-options: -Wall
   build-depends:
       base >=4.7 && <5
+    , bytestring
     , exceptions
     , network
     , retry
+  default-language: Haskell2010
   if flag(postgres)
     build-depends:
         postgresql-simple
@@ -62,7 +64,6 @@ library
   if flag(redis)
     exposed-modules:
         Network.Wait.Redis
-  default-language: Haskell2010
 
 test-suite network-wait-test
   type: exitcode-stdio-1.0
@@ -74,6 +75,7 @@ test-suite network-wait-test
   ghc-options: -Wall
   build-depends:
       base >=4.7 && <5
+    , bytestring
     , exceptions
     , network
     , network-simple
@@ -81,13 +83,13 @@ test-suite network-wait-test
     , retry
     , tasty
     , tasty-hunit
+  default-language: Haskell2010
   if flag(postgres)
     build-depends:
         postgresql-simple
   if flag(redis)
     build-depends:
         hedis
-  default-language: Haskell2010
 
 test-suite network-wait-test-postgres
   type: exitcode-stdio-1.0
@@ -99,12 +101,14 @@ test-suite network-wait-test-postgres
   ghc-options: -Wall
   build-depends:
       base >=4.7 && <5
+    , bytestring
     , exceptions
     , network
     , network-wait
     , retry
     , tasty
     , tasty-hunit
+  default-language: Haskell2010
   if flag(postgres)
     build-depends:
         postgresql-simple
@@ -115,7 +119,6 @@ test-suite network-wait-test-postgres
     buildable: True
   else
     buildable: False
-  default-language: Haskell2010
 
 test-suite network-wait-test-redis
   type: exitcode-stdio-1.0
@@ -127,12 +130,14 @@ test-suite network-wait-test-redis
   ghc-options: -Wall
   build-depends:
       base >=4.7 && <5
+    , bytestring
     , exceptions
     , network
     , network-wait
     , retry
     , tasty
     , tasty-hunit
+  default-language: Haskell2010
   if flag(postgres)
     build-depends:
         postgresql-simple
@@ -143,4 +148,3 @@ test-suite network-wait-test-redis
     buildable: True
   else
     buildable: False
-  default-language: Haskell2010

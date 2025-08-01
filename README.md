@@ -41,6 +41,23 @@ main = do
 
 Internally, this uses `postgresql-simple` to connect to the specified server (`defaultConnectInfo` in the example above) and send a `SELECT 1;` query. If the query is answered correctly, we consider the server to be in a state ready to accept commands.
 
+Alternatively, a connection string may be used instead of a `ConnectInfo` value:
+
+```haskell
+import Data.ByteString (ByteString)
+import Control.Retry (retryPolicyDefault)
+import Database.PostgreSQL.Simple (defaultConnectInfo)
+import Network.Wait.PostgreSQL (waitPostgreSQL)
+
+connStr :: ByteString
+connStr = "host=localhost port=5432"
+
+main :: IO ()
+main = do
+    waitPostgreSQL retryPolicyDefault connStr
+    putStrLn "Yay, the PostgreSQL server is ready to accept commands!"
+```
+
 The `Network.Wait.PostgreSQL` module is gated behind the `network-wait:postgres` flag so that the PostgreSQL-specific dependencies are only required when PostgresSQL support is required by users of this library.
 
 ## Example: Redis
