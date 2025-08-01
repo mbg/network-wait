@@ -9,7 +9,7 @@
 --   documentation for all modules, including those that are gated behind
 --   package flags, at <a>https://mbg.github.io/network-wait/</a>
 @package network-wait
-@version 0.2.0.0
+@version 0.3.0.0
 
 
 -- | This module contains computations which wait for some networked
@@ -107,23 +107,31 @@ recoveringWith :: (MonadIO m, MonadMask m) => [RetryStatus -> Handler m Bool] ->
 --   whether the PostgreSQL server is ready to accept commands.
 module Network.Wait.PostgreSQL
 
+-- | Used to abstract over different ways to describe a database
+--   connection.
+class PostgreSqlConnectInfo a
+
+-- | <a>connectDb</a> <tt>info</tt> attempts to establish a database
+--   connection using a configuration given by <tt>info</tt>.
+connectDb :: PostgreSqlConnectInfo a => a -> IO Connection
+
 -- | <a>waitPostgreSql</a> <tt>retryPolicy connectInfo</tt> is a variant of
 --   <tt>waitPostgresWith</tt> which does not install any additional
 --   handlers.
-waitPostgreSql :: (MonadIO m, MonadMask m) => RetryPolicyM m -> ConnectInfo -> m Connection
+waitPostgreSql :: (MonadIO m, MonadMask m, PostgreSqlConnectInfo info) => RetryPolicyM m -> info -> m Connection
 
 -- | <a>waitPostgreSqlVerbose</a> <tt>outputHandler retryPolicy
 --   connectInfo</tt> is a variant of <a>waitPostgreSqlVerboseFormat</a>
 --   which catches all exceptions derived from <a>SomeException</a> and
 --   formats retry attempt information using <a>defaultLogMsg</a> before
 --   passing the resulting <a>String</a> to <tt>out</tt>.
-waitPostgreSqlVerbose :: (MonadIO m, MonadMask m) => (String -> m ()) -> RetryPolicyM m -> ConnectInfo -> m Connection
+waitPostgreSqlVerbose :: (MonadIO m, MonadMask m, PostgreSqlConnectInfo info) => (String -> m ()) -> RetryPolicyM m -> info -> m Connection
 
 -- | <a>waitPostgreSqlVerboseFormat</a> <tt>outputHandler retryPolicy
 --   connectInfo</tt> is a variant of <a>waitPostgreSqlWith</a> which
 --   installs an extra handler based on <a>logRetries</a> which passes
 --   status information for each retry attempt to <tt>outputHandler</tt>.
-waitPostgreSqlVerboseFormat :: forall e m. (MonadIO m, MonadMask m, Exception e) => (Bool -> e -> RetryStatus -> m ()) -> RetryPolicyM m -> ConnectInfo -> m Connection
+waitPostgreSqlVerboseFormat :: forall e m info. (MonadIO m, MonadMask m, PostgreSqlConnectInfo info, Exception e) => (Bool -> e -> RetryStatus -> m ()) -> RetryPolicyM m -> info -> m Connection
 
 -- | <a>waitPostgreSqlWith</a> <tt>extraHandlers retryPolicy
 --   connectInfo</tt> will attempt to connect to the PostgreSQL server
@@ -137,7 +145,9 @@ waitPostgreSqlVerboseFormat :: forall e m. (MonadIO m, MonadMask m, Exception e)
 --   <a>skipAsyncExceptions</a>, but before the default exception handler.
 --   The <tt>extraHandlers</tt> may also be used to report retry attempts
 --   to e.g. the standard output or a logger.
-waitPostgreSqlWith :: (MonadIO m, MonadMask m) => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> ConnectInfo -> m Connection
+waitPostgreSqlWith :: (MonadIO m, MonadMask m, PostgreSqlConnectInfo info) => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> info -> m Connection
+instance Network.Wait.PostgreSQL.PostgreSqlConnectInfo Database.PostgreSQL.Simple.Internal.ConnectInfo
+instance Network.Wait.PostgreSQL.PostgreSqlConnectInfo Data.ByteString.Internal.ByteString
 
 
 -- | This module exports variants of the functions from <a>Network.Wait</a>
