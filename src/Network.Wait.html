@@ -27,43 +27,44 @@
 </span><span id="line-27"></span><span>    </span><span class="annot"><a href="Network.Wait.html#waitSocketWith"><span class="hs-identifier">waitSocketWith</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-28"></span><span>
 </span><span id="line-29"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Utility</span></span><span>
-</span><span id="line-30"></span><span>    </span><span class="annot"><a href="Network.Wait.html#recoveringWith"><span class="hs-identifier">recoveringWith</span></a></span><span>
-</span><span id="line-31"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-32"></span><span>
-</span><span id="line-33"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
-</span><span id="line-34"></span><span>
-</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Exception</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">throwIO</span></span><span class="hs-special">)</span><span>
-</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Catch</span></span><span>
-</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.IO.Class</span></span><span>
-</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Retry</span></span><span>
-</span><span id="line-39"></span><span class="hs-comment">-- Only needed for base &lt; 4.11, redundant otherwise</span><span>
-</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Semigroup</span></span><span>
-</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">System.IO.Error</span></span><span>
-</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">System.Timeout</span></span><span>
-</span><span id="line-43"></span><span>
-</span><span id="line-44"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Network.Socket</span></span><span>
-</span><span id="line-45"></span><span>
-</span><span id="line-46"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
-</span><span id="line-47"></span><span>
-</span><span id="line-48"></span><span class="hs-comment">-- | Each individual connect attempt needs a timeout to prevent it from hanging</span><span>
-</span><span id="line-49"></span><span class="hs-comment">-- indefinitely. This policy allows us to make that timeout length adaptive,</span><span>
-</span><span id="line-50"></span><span class="hs-comment">-- based on the 'RetryStatus' of the outer retry policy.</span><span>
-</span><span id="line-51"></span><span class="hs-comment">--</span><span>
-</span><span id="line-52"></span><span class="hs-comment">-- Thus, the first attempt to connect will have a short timeout (currently 100ms),</span><span>
-</span><span id="line-53"></span><span class="hs-comment">-- and then successive attempts will get longer timeouts via &quot;FullJitter&quot; backoff.</span><span>
-</span><span id="line-54"></span><span class="hs-comment">-- The goals of this are twofold:</span><span>
-</span><span id="line-55"></span><span class="hs-comment">--</span><span>
-</span><span id="line-56"></span><span class="hs-comment">-- 1) If a connect call hangs during the first few attempts, it is timed out quickly</span><span>
-</span><span id="line-57"></span><span class="hs-comment">-- and re-attempted, so on a healthy network you aren't penalized too much by the hang.</span><span>
-</span><span id="line-58"></span><span class="hs-comment">-- The outer retry policy can control the time between attempts, so the user can set</span><span>
-</span><span id="line-59"></span><span class="hs-comment">-- it high enough to make this be the case.</span><span>
-</span><span id="line-60"></span><span class="hs-comment">--</span><span>
-</span><span id="line-61"></span><span class="hs-comment">-- 2) If the network is slow, we will eventually reach the maximum timeout of 3 seconds,</span><span>
-</span><span id="line-62"></span><span class="hs-comment">-- which should be long enough. Note that the popular wait-for script uses 1 second</span><span>
-</span><span id="line-63"></span><span class="hs-comment">-- timeouts, so this is extra conservative:</span><span>
-</span><span id="line-64"></span><span class="hs-comment">-- https://github.com/eficode/wait-for/blob/7586b3622f010808bb2027c19aaf367221b4ad54/wait-for#L72</span><span>
-</span><span id="line-65"></span><span id="local-6989586621679084094"><span class="annot"><a href="Network.Wait.html#connectRetryPolicy"><span class="hs-identifier hs-type">connectRetryPolicy</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084094"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084094"><span class="hs-identifier hs-type">m</span></a></span></span><span>
-</span><span id="line-66"></span><span id="connectRetryPolicy"><span class="annot"><span class="annottext">connectRetryPolicy :: forall (m :: * -&gt; *). MonadIO m =&gt; RetryPolicyM m
+</span><span id="line-30"></span><span>    </span><span class="annot"><a href="Network.Wait.html#recoveringWith"><span class="hs-identifier">recoveringWith</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-31"></span><span>    </span><span class="annot"><a href="Network.Wait.html#recoveringWithStatus"><span class="hs-identifier">recoveringWithStatus</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Exception</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">throwIO</span></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.Catch</span></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad.IO.Class</span></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Retry</span></span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- Only needed for base &lt; 4.11, redundant otherwise</span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Semigroup</span></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">System.IO.Error</span></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">System.Timeout</span></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Network.Socket</span></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- | Each individual connect attempt needs a timeout to prevent it from hanging</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- indefinitely. This policy allows us to make that timeout length adaptive,</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- based on the 'RetryStatus' of the outer retry policy.</span><span>
+</span><span id="line-52"></span><span class="hs-comment">--</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- Thus, the first attempt to connect will have a short timeout (currently 100ms),</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- and then successive attempts will get longer timeouts via &quot;FullJitter&quot; backoff.</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- The goals of this are twofold:</span><span>
+</span><span id="line-56"></span><span class="hs-comment">--</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- 1) If a connect call hangs during the first few attempts, it is timed out quickly</span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- and re-attempted, so on a healthy network you aren't penalized too much by the hang.</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- The outer retry policy can control the time between attempts, so the user can set</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- it high enough to make this be the case.</span><span>
+</span><span id="line-61"></span><span class="hs-comment">--</span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- 2) If the network is slow, we will eventually reach the maximum timeout of 3 seconds,</span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- which should be long enough. Note that the popular wait-for script uses 1 second</span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- timeouts, so this is extra conservative:</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- https://github.com/eficode/wait-for/blob/7586b3622f010808bb2027c19aaf367221b4ad54/wait-for#L72</span><span>
+</span><span id="line-66"></span><span id="local-6989586621679084161"><span class="annot"><a href="Network.Wait.html#connectRetryPolicy"><span class="hs-identifier hs-type">connectRetryPolicy</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084161"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084161"><span class="hs-identifier hs-type">m</span></a></span></span><span>
+</span><span id="line-67"></span><span id="connectRetryPolicy"><span class="annot"><span class="annottext">connectRetryPolicy :: forall (m :: * -&gt; *). MonadIO m =&gt; RetryPolicyM m
 </span><a href="Network.Wait.html#connectRetryPolicy"><span class="hs-identifier hs-var hs-var">connectRetryPolicy</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; RetryPolicyM m -&gt; RetryPolicyM m
 forall (m :: * -&gt; *).
 Monad m =&gt;
@@ -73,15 +74,15 @@ Int -&gt; RetryPolicyM m -&gt; RetryPolicyM m
 forall (m :: * -&gt; *). MonadIO m =&gt; Int -&gt; RetryPolicyM m
 </span><span class="hs-identifier hs-var">fullJitterBackoff</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">100000</span></span><span class="hs-special">)</span><span>
-</span><span id="line-67"></span><span>
-</span><span id="line-68"></span><span class="hs-comment">-- | `waitTcp` @retryPolicy hostName serviceName@ is a variant of `waitTcpWith`</span><span>
-</span><span id="line-69"></span><span class="hs-comment">-- which does not install any additional handlers.</span><span>
-</span><span id="line-70"></span><span class="hs-comment">--</span><span>
-</span><span id="line-71"></span><span class="hs-comment">-- &gt; waitTcp retryPolicyDefault &quot;localhost&quot; &quot;80&quot;</span><span>
-</span><span id="line-72"></span><span id="local-6989586621679084101"><span class="annot"><a href="Network.Wait.html#waitTcp"><span class="hs-identifier hs-type">waitTcp</span></a></span><span>
-</span><span id="line-73"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084101"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084101"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-74"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084101"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HostName</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ServiceName</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084101"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Socket</span></span></span><span>
-</span><span id="line-75"></span><span id="waitTcp"><span class="annot"><span class="annottext">waitTcp :: forall (m :: * -&gt; *).
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- | `waitTcp` @retryPolicy hostName serviceName@ is a variant of `waitTcpWith`</span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- which does not install any additional handlers.</span><span>
+</span><span id="line-71"></span><span class="hs-comment">--</span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- &gt; waitTcp retryPolicyDefault &quot;localhost&quot; &quot;80&quot;</span><span>
+</span><span id="line-73"></span><span id="local-6989586621679084168"><span class="annot"><a href="Network.Wait.html#waitTcp"><span class="hs-identifier hs-type">waitTcp</span></a></span><span>
+</span><span id="line-74"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084168"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084168"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-75"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084168"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HostName</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ServiceName</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084168"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Socket</span></span></span><span>
+</span><span id="line-76"></span><span id="waitTcp"><span class="annot"><span class="annottext">waitTcp :: forall (m :: * -&gt; *).
 (MonadIO m, MonadMask m) =&gt;
 RetryPolicyM m -&gt; HostName -&gt; HostName -&gt; m Socket
 </span><a href="Network.Wait.html#waitTcp"><span class="hs-identifier hs-var hs-var">waitTcp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
@@ -91,24 +92,24 @@ forall (m :: * -&gt; *).
 [RetryStatus -&gt; Handler m Bool]
 -&gt; RetryPolicyM m -&gt; HostName -&gt; HostName -&gt; m Socket
 </span><a href="Network.Wait.html#waitTcpWith"><span class="hs-identifier hs-var">waitTcpWith</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-76"></span><span>
-</span><span id="line-77"></span><span class="hs-comment">-- | `waitTcpVerbose` @outputHandler retryPolicy addrInfo@ is a variant</span><span>
-</span><span id="line-78"></span><span class="hs-comment">-- of `waitTcpVerboseFormat` which catches all exceptions derived from</span><span>
-</span><span id="line-79"></span><span class="hs-comment">-- `SomeException` and formats retry attempt information using `defaultLogMsg`</span><span>
-</span><span id="line-80"></span><span class="hs-comment">-- before passing the resulting `String` to @out@.</span><span>
-</span><span id="line-81"></span><span class="hs-comment">--</span><span>
-</span><span id="line-82"></span><span class="hs-comment">-- &gt; waitTcpVerbose putStrLn retryPolicyDefault &quot;localhost&quot; &quot;80&quot;</span><span>
-</span><span id="line-83"></span><span id="local-6989586621679084110"><span class="annot"><a href="Network.Wait.html#waitTcpVerbose"><span class="hs-identifier hs-type">waitTcpVerbose</span></a></span><span>
-</span><span id="line-84"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084110"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084110"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-85"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084110"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084110"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HostName</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ServiceName</span></span><span>
-</span><span id="line-86"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084110"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Socket</span></span></span><span>
-</span><span id="line-87"></span><span id="waitTcpVerbose"><span class="annot"><span class="annottext">waitTcpVerbose :: forall (m :: * -&gt; *).
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- | `waitTcpVerbose` @outputHandler retryPolicy addrInfo@ is a variant</span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- of `waitTcpVerboseFormat` which catches all exceptions derived from</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- `SomeException` and formats retry attempt information using `defaultLogMsg`</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- before passing the resulting `String` to @out@.</span><span>
+</span><span id="line-82"></span><span class="hs-comment">--</span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- &gt; waitTcpVerbose putStrLn retryPolicyDefault &quot;localhost&quot; &quot;80&quot;</span><span>
+</span><span id="line-84"></span><span id="local-6989586621679084177"><span class="annot"><a href="Network.Wait.html#waitTcpVerbose"><span class="hs-identifier hs-type">waitTcpVerbose</span></a></span><span>
+</span><span id="line-85"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084177"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084177"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-86"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084177"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084177"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HostName</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ServiceName</span></span><span>
+</span><span id="line-87"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084177"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Socket</span></span></span><span>
+</span><span id="line-88"></span><span id="waitTcpVerbose"><span class="annot"><span class="annottext">waitTcpVerbose :: forall (m :: * -&gt; *).
 (MonadIO m, MonadMask m) =&gt;
 (HostName -&gt; m ())
 -&gt; RetryPolicyM m -&gt; HostName -&gt; HostName -&gt; m Socket
-</span><a href="Network.Wait.html#waitTcpVerbose"><span class="hs-identifier hs-var hs-var">waitTcpVerbose</span></a></span></span><span> </span><span id="local-6989586621679084211"><span class="annot"><span class="annottext">HostName -&gt; m ()
-</span><a href="#local-6989586621679084211"><span class="hs-identifier hs-var">out</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-88"></span><span>    </span><span class="annot"><span class="annottext">forall e (m :: * -&gt; *).
+</span><a href="Network.Wait.html#waitTcpVerbose"><span class="hs-identifier hs-var hs-var">waitTcpVerbose</span></a></span></span><span> </span><span id="local-6989586621679084286"><span class="annot"><span class="annottext">HostName -&gt; m ()
+</span><a href="#local-6989586621679084286"><span class="hs-identifier hs-var">out</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-89"></span><span>    </span><span class="annot"><span class="annottext">forall e (m :: * -&gt; *).
 (MonadIO m, MonadMask m, Exception e) =&gt;
 (Bool -&gt; e -&gt; RetryStatus -&gt; m ())
 -&gt; RetryPolicyM m -&gt; HostName -&gt; HostName -&gt; m Socket
@@ -121,49 +122,49 @@ forall (m :: * -&gt; *).
 -&gt; m Socket
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
-</span><span id="line-89"></span><span>    </span><span class="hs-glyph">\</span><span id="local-6989586621679084212"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679084212"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679084213"><span class="annot"><span class="annottext">SomeException
-</span><a href="#local-6989586621679084213"><span class="hs-identifier hs-var">ex</span></a></span></span><span> </span><span id="local-6989586621679084214"><span class="annot"><span class="annottext">RetryStatus
-</span><a href="#local-6989586621679084214"><span class="hs-identifier hs-var">st</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HostName -&gt; m ()
-</span><a href="#local-6989586621679084211"><span class="hs-identifier hs-var">out</span></a></span><span> </span><span class="annot"><span class="annottext">(HostName -&gt; m ()) -&gt; HostName -&gt; m ()
+</span><span id="line-90"></span><span>    </span><span class="hs-glyph">\</span><span id="local-6989586621679084287"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679084287"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679084288"><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621679084288"><span class="hs-identifier hs-var">ex</span></a></span></span><span> </span><span id="local-6989586621679084289"><span class="annot"><span class="annottext">RetryStatus
+</span><a href="#local-6989586621679084289"><span class="hs-identifier hs-var">st</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HostName -&gt; m ()
+</span><a href="#local-6989586621679084286"><span class="hs-identifier hs-var">out</span></a></span><span> </span><span class="annot"><span class="annottext">(HostName -&gt; m ()) -&gt; HostName -&gt; m ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; SomeException -&gt; RetryStatus -&gt; HostName
 forall e. Exception e =&gt; Bool -&gt; e -&gt; RetryStatus -&gt; HostName
 </span><span class="hs-identifier hs-var">defaultLogMsg</span></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679084212"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">SomeException
-</span><a href="#local-6989586621679084213"><span class="hs-identifier hs-var">ex</span></a></span><span> </span><span class="annot"><span class="annottext">RetryStatus
-</span><a href="#local-6989586621679084214"><span class="hs-identifier hs-var">st</span></a></span><span>
-</span><span id="line-90"></span><span>
-</span><span id="line-91"></span><span class="hs-comment">-- | `waitTcpVerboseFormat` @outputHandler retryPolicy addrInfo@ is a</span><span>
-</span><span id="line-92"></span><span class="hs-comment">-- variant of `waitTcpWith` which installs an extra handler based on</span><span>
-</span><span id="line-93"></span><span class="hs-comment">-- `logRetries` which passes status information for each retry attempt</span><span>
-</span><span id="line-94"></span><span class="hs-comment">-- to @outputHandler@.</span><span>
-</span><span id="line-95"></span><span class="hs-comment">--</span><span>
-</span><span id="line-96"></span><span class="hs-comment">-- &gt; waitTcpVerboseFormat @SomeException</span><span>
-</span><span id="line-97"></span><span class="hs-comment">-- &gt;      (\b ex st -&gt; putStrLn $ defaultLogMsg b ex st)</span><span>
-</span><span id="line-98"></span><span class="hs-comment">-- &gt;      retryPolicyDefault &quot;localhost&quot; &quot;80&quot;</span><span>
-</span><span id="line-99"></span><span class="annot"><a href="Network.Wait.html#waitTcpVerboseFormat"><span class="hs-identifier hs-type">waitTcpVerboseFormat</span></a></span><span>
-</span><span id="line-100"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679084115"><span class="annot"><a href="#local-6989586621679084115"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621679084114"><span class="annot"><a href="#local-6989586621679084114"><span class="hs-identifier hs-type">m</span></a></span></span><span> </span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084114"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084114"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Exception</span></span><span> </span><span class="annot"><a href="#local-6989586621679084115"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-101"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084115"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryStatus</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084114"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-102"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084114"><span class="hs-identifier hs-type">m</span></a></span><span>
-</span><span id="line-103"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HostName</span></span><span>
-</span><span id="line-104"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ServiceName</span></span><span>
-</span><span id="line-105"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084114"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Socket</span></span><span>
-</span><span id="line-106"></span><span id="waitTcpVerboseFormat"><span class="annot"><span class="annottext">waitTcpVerboseFormat :: forall e (m :: * -&gt; *).
+</span><a href="#local-6989586621679084287"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621679084288"><span class="hs-identifier hs-var">ex</span></a></span><span> </span><span class="annot"><span class="annottext">RetryStatus
+</span><a href="#local-6989586621679084289"><span class="hs-identifier hs-var">st</span></a></span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- | `waitTcpVerboseFormat` @outputHandler retryPolicy addrInfo@ is a</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- variant of `waitTcpWith` which installs an extra handler based on</span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- `logRetries` which passes status information for each retry attempt</span><span>
+</span><span id="line-95"></span><span class="hs-comment">-- to @outputHandler@.</span><span>
+</span><span id="line-96"></span><span class="hs-comment">--</span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- &gt; waitTcpVerboseFormat @SomeException</span><span>
+</span><span id="line-98"></span><span class="hs-comment">-- &gt;      (\b ex st -&gt; putStrLn $ defaultLogMsg b ex st)</span><span>
+</span><span id="line-99"></span><span class="hs-comment">-- &gt;      retryPolicyDefault &quot;localhost&quot; &quot;80&quot;</span><span>
+</span><span id="line-100"></span><span class="annot"><a href="Network.Wait.html#waitTcpVerboseFormat"><span class="hs-identifier hs-type">waitTcpVerboseFormat</span></a></span><span>
+</span><span id="line-101"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679084182"><span class="annot"><a href="#local-6989586621679084182"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621679084181"><span class="annot"><a href="#local-6989586621679084181"><span class="hs-identifier hs-type">m</span></a></span></span><span> </span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084181"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084181"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Exception</span></span><span> </span><span class="annot"><a href="#local-6989586621679084182"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-102"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084182"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryStatus</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084181"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-103"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084181"><span class="hs-identifier hs-type">m</span></a></span><span>
+</span><span id="line-104"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HostName</span></span><span>
+</span><span id="line-105"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ServiceName</span></span><span>
+</span><span id="line-106"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084181"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Socket</span></span><span>
+</span><span id="line-107"></span><span id="waitTcpVerboseFormat"><span class="annot"><span class="annottext">waitTcpVerboseFormat :: forall e (m :: * -&gt; *).
 (MonadIO m, MonadMask m, Exception e) =&gt;
 (Bool -&gt; e -&gt; RetryStatus -&gt; m ())
 -&gt; RetryPolicyM m -&gt; HostName -&gt; HostName -&gt; m Socket
-</span><a href="Network.Wait.html#waitTcpVerboseFormat"><span class="hs-identifier hs-var hs-var">waitTcpVerboseFormat</span></a></span></span><span> </span><span id="local-6989586621679084230"><span class="annot"><span class="annottext">Bool -&gt; e -&gt; RetryStatus -&gt; m ()
-</span><a href="#local-6989586621679084230"><span class="hs-identifier hs-var">out</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
+</span><a href="Network.Wait.html#waitTcpVerboseFormat"><span class="hs-identifier hs-var hs-var">waitTcpVerboseFormat</span></a></span></span><span> </span><span id="local-6989586621679084305"><span class="annot"><span class="annottext">Bool -&gt; e -&gt; RetryStatus -&gt; m ()
+</span><a href="#local-6989586621679084305"><span class="hs-identifier hs-var">out</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
 -&gt; RetryPolicyM m -&gt; HostName -&gt; HostName -&gt; m Socket
 forall (m :: * -&gt; *).
 (MonadIO m, MonadMask m) =&gt;
 [RetryStatus -&gt; Handler m Bool]
 -&gt; RetryPolicyM m -&gt; HostName -&gt; HostName -&gt; m Socket
 </span><a href="Network.Wait.html#waitTcpWith"><span class="hs-identifier hs-var">waitTcpWith</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">RetryStatus -&gt; Handler m Bool
-</span><a href="#local-6989586621679084231"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-107"></span><span>    </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679084231"><span class="annot"><span class="annottext">h :: RetryStatus -&gt; Handler m Bool
-</span><a href="#local-6989586621679084231"><span class="hs-identifier hs-var hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(e -&gt; m Bool)
+</span><a href="#local-6989586621679084306"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-108"></span><span>    </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679084306"><span class="annot"><span class="annottext">h :: RetryStatus -&gt; Handler m Bool
+</span><a href="#local-6989586621679084306"><span class="hs-identifier hs-var hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(e -&gt; m Bool)
 -&gt; (Bool -&gt; e -&gt; RetryStatus -&gt; m ())
 -&gt; RetryStatus
 -&gt; Handler m Bool
@@ -182,28 +183,28 @@ forall a. a -&gt; m a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; e -&gt; RetryStatus -&gt; m ()
-</span><a href="#local-6989586621679084230"><span class="hs-identifier hs-var">out</span></a></span><span>
-</span><span id="line-108"></span><span>
-</span><span id="line-109"></span><span class="hs-comment">-- | `waitTcpWith` @extraHandlers retryPolicy hostName serviceName@ is a</span><span>
-</span><span id="line-110"></span><span class="hs-comment">-- variant of `waitSocketWith` which constructs a suitable `AddrInfo` value</span><span>
-</span><span id="line-111"></span><span class="hs-comment">-- for a TCP socket from @hostName@ and @serviceName@.</span><span>
-</span><span id="line-112"></span><span id="local-6989586621679084108"><span class="annot"><a href="Network.Wait.html#waitTcpWith"><span class="hs-identifier hs-type">waitTcpWith</span></a></span><span>
-</span><span id="line-113"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084108"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084108"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-114"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">RetryStatus</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handler</span></span><span> </span><span class="annot"><a href="#local-6989586621679084108"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">]</span><span>
-</span><span id="line-115"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084108"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HostName</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ServiceName</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084108"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Socket</span></span></span><span>
-</span><span id="line-116"></span><span id="waitTcpWith"><span class="annot"><span class="annottext">waitTcpWith :: forall (m :: * -&gt; *).
+</span><a href="#local-6989586621679084305"><span class="hs-identifier hs-var">out</span></a></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span class="hs-comment">-- | `waitTcpWith` @extraHandlers retryPolicy hostName serviceName@ is a</span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- variant of `waitSocketWith` which constructs a suitable `AddrInfo` value</span><span>
+</span><span id="line-112"></span><span class="hs-comment">-- for a TCP socket from @hostName@ and @serviceName@.</span><span>
+</span><span id="line-113"></span><span id="local-6989586621679084175"><span class="annot"><a href="Network.Wait.html#waitTcpWith"><span class="hs-identifier hs-type">waitTcpWith</span></a></span><span>
+</span><span id="line-114"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084175"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084175"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-115"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">RetryStatus</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handler</span></span><span> </span><span class="annot"><a href="#local-6989586621679084175"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">]</span><span>
+</span><span id="line-116"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084175"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HostName</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ServiceName</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084175"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Socket</span></span></span><span>
+</span><span id="line-117"></span><span id="waitTcpWith"><span class="annot"><span class="annottext">waitTcpWith :: forall (m :: * -&gt; *).
 (MonadIO m, MonadMask m) =&gt;
 [RetryStatus -&gt; Handler m Bool]
 -&gt; RetryPolicyM m -&gt; HostName -&gt; HostName -&gt; m Socket
-</span><a href="Network.Wait.html#waitTcpWith"><span class="hs-identifier hs-var hs-var">waitTcpWith</span></a></span></span><span> </span><span id="local-6989586621679084256"><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
-</span><a href="#local-6989586621679084256"><span class="hs-identifier hs-var">hs</span></a></span></span><span> </span><span id="local-6989586621679084257"><span class="annot"><span class="annottext">RetryPolicyM m
-</span><a href="#local-6989586621679084257"><span class="hs-identifier hs-var">policy</span></a></span></span><span> </span><span id="local-6989586621679084258"><span class="annot"><span class="annottext">HostName
-</span><a href="#local-6989586621679084258"><span class="hs-identifier hs-var">host</span></a></span></span><span> </span><span id="local-6989586621679084259"><span class="annot"><span class="annottext">HostName
-</span><a href="#local-6989586621679084259"><span class="hs-identifier hs-var">port</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-117"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679084260"><span class="annot"><span class="annottext">hints :: AddrInfo
-</span><a href="#local-6989586621679084260"><span class="hs-identifier hs-var hs-var hs-var">hints</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AddrInfo
+</span><a href="Network.Wait.html#waitTcpWith"><span class="hs-identifier hs-var hs-var">waitTcpWith</span></a></span></span><span> </span><span id="local-6989586621679084331"><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
+</span><a href="#local-6989586621679084331"><span class="hs-identifier hs-var">hs</span></a></span></span><span> </span><span id="local-6989586621679084332"><span class="annot"><span class="annottext">RetryPolicyM m
+</span><a href="#local-6989586621679084332"><span class="hs-identifier hs-var">policy</span></a></span></span><span> </span><span id="local-6989586621679084333"><span class="annot"><span class="annottext">HostName
+</span><a href="#local-6989586621679084333"><span class="hs-identifier hs-var">host</span></a></span></span><span> </span><span id="local-6989586621679084334"><span class="annot"><span class="annottext">HostName
+</span><a href="#local-6989586621679084334"><span class="hs-identifier hs-var">port</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-118"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679084335"><span class="annot"><span class="annottext">hints :: AddrInfo
+</span><a href="#local-6989586621679084335"><span class="hs-identifier hs-var hs-var hs-var">hints</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AddrInfo
 </span><span class="hs-identifier hs-var">defaultHints</span></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="hs-identifier hs-var">addrSocketType</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Stream</span></span><span> </span><span class="hs-special">}</span><span>
-</span><span id="line-118"></span><span>    </span><span id="local-6989586621679084264"><span class="annot"><a href="#local-6989586621679084264"><span class="hs-identifier hs-var">addr</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[AddrInfo] -&gt; AddrInfo
+</span><span id="line-119"></span><span>    </span><span id="local-6989586621679084339"><span class="annot"><a href="#local-6989586621679084339"><span class="hs-identifier hs-var">addr</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[AddrInfo] -&gt; AddrInfo
 forall a. HasCallStack =&gt; [a] -&gt; a
 </span><span class="hs-identifier hs-var">head</span></span><span> </span><span class="annot"><span class="annottext">([AddrInfo] -&gt; AddrInfo) -&gt; m [AddrInfo] -&gt; m AddrInfo
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
@@ -218,21 +219,21 @@ Maybe AddrInfo
 </span><span class="hs-identifier hs-var">getAddrInfo</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">AddrInfo -&gt; Maybe AddrInfo
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">AddrInfo
-</span><a href="#local-6989586621679084260"><span class="hs-identifier hs-var">hints</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HostName -&gt; Maybe HostName
+</span><a href="#local-6989586621679084335"><span class="hs-identifier hs-var">hints</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HostName -&gt; Maybe HostName
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">HostName
-</span><a href="#local-6989586621679084258"><span class="hs-identifier hs-var">host</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HostName -&gt; Maybe HostName
+</span><a href="#local-6989586621679084333"><span class="hs-identifier hs-var">host</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HostName -&gt; Maybe HostName
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">HostName
-</span><a href="#local-6989586621679084259"><span class="hs-identifier hs-var">port</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-119"></span><span>    </span><span class="annot"><a href="Network.Wait.html#waitSocketWith"><span class="hs-identifier hs-type">waitSocketWith</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679084256"><span class="hs-identifier hs-type">hs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679084257"><span class="hs-identifier hs-type">policy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679084264"><span class="hs-identifier hs-type">addr</span></a></span><span>
-</span><span id="line-120"></span><span>
-</span><span id="line-121"></span><span class="hs-comment">-- | `waitSocket` @retryPolicy addrInfo@ is a variant of `waitSocketWith` which</span><span>
-</span><span id="line-122"></span><span class="hs-comment">-- does not install any additional exception handlers.</span><span>
-</span><span id="line-123"></span><span id="local-6989586621679084143"><span class="annot"><a href="Network.Wait.html#waitSocket"><span class="hs-identifier hs-type">waitSocket</span></a></span><span>
-</span><span id="line-124"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084143"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084143"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-125"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084143"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AddrInfo</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084143"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Socket</span></span></span><span>
-</span><span id="line-126"></span><span id="waitSocket"><span class="annot"><span class="annottext">waitSocket :: forall (m :: * -&gt; *).
+</span><a href="#local-6989586621679084334"><span class="hs-identifier hs-var">port</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-120"></span><span>    </span><span class="annot"><a href="Network.Wait.html#waitSocketWith"><span class="hs-identifier hs-type">waitSocketWith</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679084331"><span class="hs-identifier hs-type">hs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679084332"><span class="hs-identifier hs-type">policy</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679084339"><span class="hs-identifier hs-type">addr</span></a></span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- | `waitSocket` @retryPolicy addrInfo@ is a variant of `waitSocketWith` which</span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- does not install any additional exception handlers.</span><span>
+</span><span id="line-124"></span><span id="local-6989586621679084210"><span class="annot"><a href="Network.Wait.html#waitSocket"><span class="hs-identifier hs-type">waitSocket</span></a></span><span>
+</span><span id="line-125"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084210"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084210"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-126"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084210"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AddrInfo</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084210"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Socket</span></span></span><span>
+</span><span id="line-127"></span><span id="waitSocket"><span class="annot"><span class="annottext">waitSocket :: forall (m :: * -&gt; *).
 (MonadIO m, MonadMask m) =&gt;
 RetryPolicyM m -&gt; AddrInfo -&gt; m Socket
 </span><a href="Network.Wait.html#waitSocket"><span class="hs-identifier hs-var hs-var">waitSocket</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
@@ -242,20 +243,20 @@ forall (m :: * -&gt; *).
 [RetryStatus -&gt; Handler m Bool]
 -&gt; RetryPolicyM m -&gt; AddrInfo -&gt; m Socket
 </span><a href="Network.Wait.html#waitSocketWith"><span class="hs-identifier hs-var">waitSocketWith</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-127"></span><span>
-</span><span id="line-128"></span><span class="hs-comment">-- | `waitSocketVerbose` @outputHandler retryPolicy addrInfo@ is a variant</span><span>
-</span><span id="line-129"></span><span class="hs-comment">-- of `waitSocketVerboseFormat` which catches all exceptions derived from</span><span>
-</span><span id="line-130"></span><span class="hs-comment">-- `SomeException` and formats retry attempt information using `defaultLogMsg`</span><span>
-</span><span id="line-131"></span><span class="hs-comment">-- before passing the resulting `String` to @out@.</span><span>
-</span><span id="line-132"></span><span id="local-6989586621679084145"><span class="annot"><a href="Network.Wait.html#waitSocketVerbose"><span class="hs-identifier hs-type">waitSocketVerbose</span></a></span><span>
-</span><span id="line-133"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084145"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084145"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-134"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084145"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084145"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AddrInfo</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084145"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Socket</span></span></span><span>
-</span><span id="line-135"></span><span id="waitSocketVerbose"><span class="annot"><span class="annottext">waitSocketVerbose :: forall (m :: * -&gt; *).
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span class="hs-comment">-- | `waitSocketVerbose` @outputHandler retryPolicy addrInfo@ is a variant</span><span>
+</span><span id="line-130"></span><span class="hs-comment">-- of `waitSocketVerboseFormat` which catches all exceptions derived from</span><span>
+</span><span id="line-131"></span><span class="hs-comment">-- `SomeException` and formats retry attempt information using `defaultLogMsg`</span><span>
+</span><span id="line-132"></span><span class="hs-comment">-- before passing the resulting `String` to @out@.</span><span>
+</span><span id="line-133"></span><span id="local-6989586621679084212"><span class="annot"><a href="Network.Wait.html#waitSocketVerbose"><span class="hs-identifier hs-type">waitSocketVerbose</span></a></span><span>
+</span><span id="line-134"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084212"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084212"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084212"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084212"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AddrInfo</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084212"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Socket</span></span></span><span>
+</span><span id="line-136"></span><span id="waitSocketVerbose"><span class="annot"><span class="annottext">waitSocketVerbose :: forall (m :: * -&gt; *).
 (MonadIO m, MonadMask m) =&gt;
 (HostName -&gt; m ()) -&gt; RetryPolicyM m -&gt; AddrInfo -&gt; m Socket
-</span><a href="Network.Wait.html#waitSocketVerbose"><span class="hs-identifier hs-var hs-var">waitSocketVerbose</span></a></span></span><span> </span><span id="local-6989586621679084279"><span class="annot"><span class="annottext">HostName -&gt; m ()
-</span><a href="#local-6989586621679084279"><span class="hs-identifier hs-var">out</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-136"></span><span>    </span><span class="annot"><span class="annottext">forall e (m :: * -&gt; *).
+</span><a href="Network.Wait.html#waitSocketVerbose"><span class="hs-identifier hs-var hs-var">waitSocketVerbose</span></a></span></span><span> </span><span id="local-6989586621679084354"><span class="annot"><span class="annottext">HostName -&gt; m ()
+</span><a href="#local-6989586621679084354"><span class="hs-identifier hs-var">out</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-137"></span><span>    </span><span class="annot"><span class="annottext">forall e (m :: * -&gt; *).
 (MonadIO m, MonadMask m, Exception e) =&gt;
 (Bool -&gt; e -&gt; RetryStatus -&gt; m ())
 -&gt; RetryPolicyM m -&gt; AddrInfo -&gt; m Socket
@@ -267,44 +268,44 @@ forall (m :: * -&gt; *).
 -&gt; m Socket
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
-</span><span id="line-137"></span><span>    </span><span class="hs-glyph">\</span><span id="local-6989586621679084280"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679084280"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679084281"><span class="annot"><span class="annottext">SomeException
-</span><a href="#local-6989586621679084281"><span class="hs-identifier hs-var">ex</span></a></span></span><span> </span><span id="local-6989586621679084282"><span class="annot"><span class="annottext">RetryStatus
-</span><a href="#local-6989586621679084282"><span class="hs-identifier hs-var">st</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HostName -&gt; m ()
-</span><a href="#local-6989586621679084279"><span class="hs-identifier hs-var">out</span></a></span><span> </span><span class="annot"><span class="annottext">(HostName -&gt; m ()) -&gt; HostName -&gt; m ()
+</span><span id="line-138"></span><span>    </span><span class="hs-glyph">\</span><span id="local-6989586621679084355"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679084355"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679084356"><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621679084356"><span class="hs-identifier hs-var">ex</span></a></span></span><span> </span><span id="local-6989586621679084357"><span class="annot"><span class="annottext">RetryStatus
+</span><a href="#local-6989586621679084357"><span class="hs-identifier hs-var">st</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HostName -&gt; m ()
+</span><a href="#local-6989586621679084354"><span class="hs-identifier hs-var">out</span></a></span><span> </span><span class="annot"><span class="annottext">(HostName -&gt; m ()) -&gt; HostName -&gt; m ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; SomeException -&gt; RetryStatus -&gt; HostName
 forall e. Exception e =&gt; Bool -&gt; e -&gt; RetryStatus -&gt; HostName
 </span><span class="hs-identifier hs-var">defaultLogMsg</span></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679084280"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">SomeException
-</span><a href="#local-6989586621679084281"><span class="hs-identifier hs-var">ex</span></a></span><span> </span><span class="annot"><span class="annottext">RetryStatus
-</span><a href="#local-6989586621679084282"><span class="hs-identifier hs-var">st</span></a></span><span>
-</span><span id="line-138"></span><span>
-</span><span id="line-139"></span><span class="hs-comment">-- | `waitSocketVerboseFormat` @outputHandler retryPolicy addrInfo@ is a</span><span>
-</span><span id="line-140"></span><span class="hs-comment">-- variant of `waitSocketWith` which installs an extra handler based on</span><span>
-</span><span id="line-141"></span><span class="hs-comment">-- `logRetries` which passes status information for each retry attempt</span><span>
-</span><span id="line-142"></span><span class="hs-comment">-- to @outputHandler@.</span><span>
-</span><span id="line-143"></span><span class="annot"><a href="Network.Wait.html#waitSocketVerboseFormat"><span class="hs-identifier hs-type">waitSocketVerboseFormat</span></a></span><span>
-</span><span id="line-144"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679084148"><span class="annot"><a href="#local-6989586621679084148"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621679084147"><span class="annot"><a href="#local-6989586621679084147"><span class="hs-identifier hs-type">m</span></a></span></span><span> </span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084147"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084147"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Exception</span></span><span> </span><span class="annot"><a href="#local-6989586621679084148"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-145"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084148"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryStatus</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084147"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-146"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084147"><span class="hs-identifier hs-type">m</span></a></span><span>
-</span><span id="line-147"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AddrInfo</span></span><span>
-</span><span id="line-148"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084147"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Socket</span></span><span>
-</span><span id="line-149"></span><span id="waitSocketVerboseFormat"><span class="annot"><span class="annottext">waitSocketVerboseFormat :: forall e (m :: * -&gt; *).
+</span><a href="#local-6989586621679084355"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">SomeException
+</span><a href="#local-6989586621679084356"><span class="hs-identifier hs-var">ex</span></a></span><span> </span><span class="annot"><span class="annottext">RetryStatus
+</span><a href="#local-6989586621679084357"><span class="hs-identifier hs-var">st</span></a></span><span>
+</span><span id="line-139"></span><span>
+</span><span id="line-140"></span><span class="hs-comment">-- | `waitSocketVerboseFormat` @outputHandler retryPolicy addrInfo@ is a</span><span>
+</span><span id="line-141"></span><span class="hs-comment">-- variant of `waitSocketWith` which installs an extra handler based on</span><span>
+</span><span id="line-142"></span><span class="hs-comment">-- `logRetries` which passes status information for each retry attempt</span><span>
+</span><span id="line-143"></span><span class="hs-comment">-- to @outputHandler@.</span><span>
+</span><span id="line-144"></span><span class="annot"><a href="Network.Wait.html#waitSocketVerboseFormat"><span class="hs-identifier hs-type">waitSocketVerboseFormat</span></a></span><span>
+</span><span id="line-145"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679084215"><span class="annot"><a href="#local-6989586621679084215"><span class="hs-identifier hs-type">e</span></a></span></span><span> </span><span id="local-6989586621679084214"><span class="annot"><a href="#local-6989586621679084214"><span class="hs-identifier hs-type">m</span></a></span></span><span> </span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084214"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084214"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Exception</span></span><span> </span><span class="annot"><a href="#local-6989586621679084215"><span class="hs-identifier hs-type">e</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-146"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084215"><span class="hs-identifier hs-type">e</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryStatus</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084214"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-147"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084214"><span class="hs-identifier hs-type">m</span></a></span><span>
+</span><span id="line-148"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AddrInfo</span></span><span>
+</span><span id="line-149"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084214"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Socket</span></span><span>
+</span><span id="line-150"></span><span id="waitSocketVerboseFormat"><span class="annot"><span class="annottext">waitSocketVerboseFormat :: forall e (m :: * -&gt; *).
 (MonadIO m, MonadMask m, Exception e) =&gt;
 (Bool -&gt; e -&gt; RetryStatus -&gt; m ())
 -&gt; RetryPolicyM m -&gt; AddrInfo -&gt; m Socket
-</span><a href="Network.Wait.html#waitSocketVerboseFormat"><span class="hs-identifier hs-var hs-var">waitSocketVerboseFormat</span></a></span></span><span> </span><span id="local-6989586621679084293"><span class="annot"><span class="annottext">Bool -&gt; e -&gt; RetryStatus -&gt; m ()
-</span><a href="#local-6989586621679084293"><span class="hs-identifier hs-var">out</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
+</span><a href="Network.Wait.html#waitSocketVerboseFormat"><span class="hs-identifier hs-var hs-var">waitSocketVerboseFormat</span></a></span></span><span> </span><span id="local-6989586621679084368"><span class="annot"><span class="annottext">Bool -&gt; e -&gt; RetryStatus -&gt; m ()
+</span><a href="#local-6989586621679084368"><span class="hs-identifier hs-var">out</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
 -&gt; RetryPolicyM m -&gt; AddrInfo -&gt; m Socket
 forall (m :: * -&gt; *).
 (MonadIO m, MonadMask m) =&gt;
 [RetryStatus -&gt; Handler m Bool]
 -&gt; RetryPolicyM m -&gt; AddrInfo -&gt; m Socket
 </span><a href="Network.Wait.html#waitSocketWith"><span class="hs-identifier hs-var">waitSocketWith</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">RetryStatus -&gt; Handler m Bool
-</span><a href="#local-6989586621679084294"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-150"></span><span>    </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679084294"><span class="annot"><span class="annottext">h :: RetryStatus -&gt; Handler m Bool
-</span><a href="#local-6989586621679084294"><span class="hs-identifier hs-var hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(e -&gt; m Bool)
+</span><a href="#local-6989586621679084369"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-151"></span><span>    </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679084369"><span class="annot"><span class="annottext">h :: RetryStatus -&gt; Handler m Bool
+</span><a href="#local-6989586621679084369"><span class="hs-identifier hs-var hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(e -&gt; m Bool)
 -&gt; (Bool -&gt; e -&gt; RetryStatus -&gt; m ())
 -&gt; RetryStatus
 -&gt; Handler m Bool
@@ -323,73 +324,73 @@ forall a. a -&gt; m a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; e -&gt; RetryStatus -&gt; m ()
-</span><a href="#local-6989586621679084293"><span class="hs-identifier hs-var">out</span></a></span><span>
-</span><span id="line-151"></span><span>
-</span><span id="line-152"></span><span class="hs-comment">-- | `waitSocketWith` @extraHandlers retryPolicy addrInfo@ will attempt to</span><span>
-</span><span id="line-153"></span><span class="hs-comment">-- connect to @addrInfo@. If the connection fails, @retryPolicy@ is used</span><span>
-</span><span id="line-154"></span><span class="hs-comment">-- to determine whether (and how often) this function should attempt to</span><span>
-</span><span id="line-155"></span><span class="hs-comment">-- retry establishing the connection. By default, this function will</span><span>
-</span><span id="line-156"></span><span class="hs-comment">-- retry after all exceptions (except for those given by</span><span>
-</span><span id="line-157"></span><span class="hs-comment">-- `skipAsyncExceptions`). This behaviour may be customised with</span><span>
-</span><span id="line-158"></span><span class="hs-comment">-- @extraHandlers@ which are installed after `skipAsyncExceptions`, but</span><span>
-</span><span id="line-159"></span><span class="hs-comment">-- before the default exception handler. The @extraHandlers@ may also</span><span>
-</span><span id="line-160"></span><span class="hs-comment">-- be used to report retry attempts to e.g. the standard output or a</span><span>
-</span><span id="line-161"></span><span class="hs-comment">-- logger.</span><span>
-</span><span id="line-162"></span><span id="local-6989586621679084142"><span class="annot"><a href="Network.Wait.html#waitSocketWith"><span class="hs-identifier hs-type">waitSocketWith</span></a></span><span>
-</span><span id="line-163"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084142"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084142"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-164"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">RetryStatus</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handler</span></span><span> </span><span class="annot"><a href="#local-6989586621679084142"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084142"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AddrInfo</span></span><span>
-</span><span id="line-165"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084142"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Socket</span></span></span><span>
-</span><span id="line-166"></span><span id="waitSocketWith"><span class="annot"><span class="annottext">waitSocketWith :: forall (m :: * -&gt; *).
+</span><a href="#local-6989586621679084368"><span class="hs-identifier hs-var">out</span></a></span><span>
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span class="hs-comment">-- | `waitSocketWith` @extraHandlers retryPolicy addrInfo@ will attempt to</span><span>
+</span><span id="line-154"></span><span class="hs-comment">-- connect to @addrInfo@. If the connection fails, @retryPolicy@ is used</span><span>
+</span><span id="line-155"></span><span class="hs-comment">-- to determine whether (and how often) this function should attempt to</span><span>
+</span><span id="line-156"></span><span class="hs-comment">-- retry establishing the connection. By default, this function will</span><span>
+</span><span id="line-157"></span><span class="hs-comment">-- retry after all exceptions (except for those given by</span><span>
+</span><span id="line-158"></span><span class="hs-comment">-- `skipAsyncExceptions`). This behaviour may be customised with</span><span>
+</span><span id="line-159"></span><span class="hs-comment">-- @extraHandlers@ which are installed after `skipAsyncExceptions`, but</span><span>
+</span><span id="line-160"></span><span class="hs-comment">-- before the default exception handler. The @extraHandlers@ may also</span><span>
+</span><span id="line-161"></span><span class="hs-comment">-- be used to report retry attempts to e.g. the standard output or a</span><span>
+</span><span id="line-162"></span><span class="hs-comment">-- logger.</span><span>
+</span><span id="line-163"></span><span id="local-6989586621679084209"><span class="annot"><a href="Network.Wait.html#waitSocketWith"><span class="hs-identifier hs-type">waitSocketWith</span></a></span><span>
+</span><span id="line-164"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084209"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084209"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-165"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">RetryStatus</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handler</span></span><span> </span><span class="annot"><a href="#local-6989586621679084209"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084209"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AddrInfo</span></span><span>
+</span><span id="line-166"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084209"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Socket</span></span></span><span>
+</span><span id="line-167"></span><span id="waitSocketWith"><span class="annot"><span class="annottext">waitSocketWith :: forall (m :: * -&gt; *).
 (MonadIO m, MonadMask m) =&gt;
 [RetryStatus -&gt; Handler m Bool]
 -&gt; RetryPolicyM m -&gt; AddrInfo -&gt; m Socket
-</span><a href="Network.Wait.html#waitSocketWith"><span class="hs-identifier hs-var hs-var">waitSocketWith</span></a></span></span><span> </span><span id="local-6989586621679084329"><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
-</span><a href="#local-6989586621679084329"><span class="hs-identifier hs-var">hs</span></a></span></span><span> </span><span id="local-6989586621679084330"><span class="annot"><span class="annottext">RetryPolicyM m
-</span><a href="#local-6989586621679084330"><span class="hs-identifier hs-var">policy</span></a></span></span><span> </span><span id="local-6989586621679084331"><span class="annot"><span class="annottext">AddrInfo
-</span><a href="#local-6989586621679084331"><span class="hs-identifier hs-var">addr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-167"></span><span>    </span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
+</span><a href="Network.Wait.html#waitSocketWith"><span class="hs-identifier hs-var hs-var">waitSocketWith</span></a></span></span><span> </span><span id="local-6989586621679084404"><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
+</span><a href="#local-6989586621679084404"><span class="hs-identifier hs-var">hs</span></a></span></span><span> </span><span id="local-6989586621679084405"><span class="annot"><span class="annottext">RetryPolicyM m
+</span><a href="#local-6989586621679084405"><span class="hs-identifier hs-var">policy</span></a></span></span><span> </span><span id="local-6989586621679084406"><span class="annot"><span class="annottext">AddrInfo
+</span><a href="#local-6989586621679084406"><span class="hs-identifier hs-var">addr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-168"></span><span>    </span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
 -&gt; RetryPolicyM m -&gt; (RetryStatus -&gt; m Socket) -&gt; m Socket
 forall (m :: * -&gt; *) a.
 (MonadIO m, MonadMask m) =&gt;
 [RetryStatus -&gt; Handler m Bool]
 -&gt; RetryPolicyM m -&gt; (RetryStatus -&gt; m a) -&gt; m a
-</span><a href="Network.Wait.html#recoveringWith"><span class="hs-identifier hs-var">recoveringWith</span></a></span><span> </span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
-</span><a href="#local-6989586621679084329"><span class="hs-identifier hs-var">hs</span></a></span><span> </span><span class="annot"><span class="annottext">RetryPolicyM m
-</span><a href="#local-6989586621679084330"><span class="hs-identifier hs-var">policy</span></a></span><span> </span><span class="annot"><span class="annottext">((RetryStatus -&gt; m Socket) -&gt; m Socket)
+</span><a href="Network.Wait.html#recoveringWithStatus"><span class="hs-identifier hs-var">recoveringWithStatus</span></a></span><span> </span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
+</span><a href="#local-6989586621679084404"><span class="hs-identifier hs-var">hs</span></a></span><span> </span><span class="annot"><span class="annottext">RetryPolicyM m
+</span><a href="#local-6989586621679084405"><span class="hs-identifier hs-var">policy</span></a></span><span> </span><span class="annot"><span class="annottext">((RetryStatus -&gt; m Socket) -&gt; m Socket)
 -&gt; (RetryStatus -&gt; m Socket) -&gt; m Socket
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679084332"><span class="annot"><span class="annottext">RetryStatus
-</span><a href="#local-6989586621679084332"><span class="hs-identifier hs-var">retryStatus</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-168"></span><span>    </span><span class="hs-comment">-- all of the networking code runs in IO</span><span>
-</span><span id="line-169"></span><span>    </span><span class="annot"><span class="annottext">IO Socket -&gt; m Socket
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679084407"><span class="annot"><span class="annottext">RetryStatus
+</span><a href="#local-6989586621679084407"><span class="hs-identifier hs-var">retryStatus</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-169"></span><span>    </span><span class="hs-comment">-- all of the networking code runs in IO</span><span>
+</span><span id="line-170"></span><span>    </span><span class="annot"><span class="annottext">IO Socket -&gt; m Socket
 forall a. IO a -&gt; m a
 forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
 </span><span class="hs-identifier hs-var">liftIO</span></span><span> </span><span class="annot"><span class="annottext">(IO Socket -&gt; m Socket) -&gt; IO Socket -&gt; m Socket
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
-</span><span id="line-170"></span><span>    </span><span class="hs-comment">-- we want to make sure that we close the socket after every attempt;</span><span>
-</span><span id="line-171"></span><span>    </span><span class="hs-comment">-- `bracket` will re-throw any error afterwards</span><span>
-</span><span id="line-172"></span><span>    </span><span class="annot"><span class="annottext">IO Socket
+</span><span id="line-171"></span><span>    </span><span class="hs-comment">-- we want to make sure that we close the socket after every attempt;</span><span>
+</span><span id="line-172"></span><span>    </span><span class="hs-comment">-- `bracket` will re-throw any error afterwards</span><span>
+</span><span id="line-173"></span><span>    </span><span class="annot"><span class="annottext">IO Socket
 -&gt; (Socket -&gt; IO ()) -&gt; (Socket -&gt; IO Socket) -&gt; IO Socket
 forall (m :: * -&gt; *) a c b.
 (HasCallStack, MonadMask m) =&gt;
 m a -&gt; (a -&gt; m c) -&gt; (a -&gt; m b) -&gt; m b
 </span><span class="hs-identifier hs-var">bracket</span></span><span> </span><span class="annot"><span class="annottext">IO Socket
-</span><a href="#local-6989586621679084334"><span class="hs-identifier hs-var">initSocket</span></a></span><span> </span><span class="annot"><span class="annottext">Socket -&gt; IO ()
+</span><a href="#local-6989586621679084409"><span class="hs-identifier hs-var">initSocket</span></a></span><span> </span><span class="annot"><span class="annottext">Socket -&gt; IO ()
 </span><span class="hs-identifier hs-var">close</span></span><span> </span><span class="annot"><span class="annottext">((Socket -&gt; IO Socket) -&gt; IO Socket)
 -&gt; (Socket -&gt; IO Socket) -&gt; IO Socket
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679084336"><span class="annot"><span class="annottext">Socket
-</span><a href="#local-6989586621679084336"><span class="hs-identifier hs-var">sock</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-173"></span><span>        </span><span id="local-6989586621679084337"><span class="annot"><a href="#local-6989586621679084337"><span class="hs-identifier hs-var">maybeConnectTimeoutUs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RetryPolicyM IO -&gt; RetryStatus -&gt; IO (Maybe Int)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679084411"><span class="annot"><span class="annottext">Socket
+</span><a href="#local-6989586621679084411"><span class="hs-identifier hs-var">sock</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-174"></span><span>        </span><span id="local-6989586621679084412"><span class="annot"><a href="#local-6989586621679084412"><span class="hs-identifier hs-var">maybeConnectTimeoutUs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">RetryPolicyM IO -&gt; RetryStatus -&gt; IO (Maybe Int)
 forall (m :: * -&gt; *).
 RetryPolicyM m -&gt; RetryStatus -&gt; m (Maybe Int)
 </span><span class="hs-identifier hs-var">getRetryPolicyM</span></span><span> </span><span class="annot"><span class="annottext">RetryPolicyM IO
 forall (m :: * -&gt; *). MonadIO m =&gt; RetryPolicyM m
 </span><a href="Network.Wait.html#connectRetryPolicy"><span class="hs-identifier hs-var">connectRetryPolicy</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">RetryStatus
-</span><a href="#local-6989586621679084332"><span class="hs-identifier hs-var">retryStatus</span></a></span><span>
-</span><span id="line-174"></span><span>        </span><span id="local-6989586621679084339"><span class="annot"><a href="#local-6989586621679084339"><span class="hs-identifier hs-var">connectTimeoutUs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621679084337"><span class="hs-identifier hs-type">maybeConnectTimeoutUs</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-175"></span><span>            </span><span class="annot"><span class="annottext">Maybe Int
+</span><a href="#local-6989586621679084407"><span class="hs-identifier hs-var">retryStatus</span></a></span><span>
+</span><span id="line-175"></span><span>        </span><span id="local-6989586621679084414"><span class="annot"><a href="#local-6989586621679084414"><span class="hs-identifier hs-var">connectTimeoutUs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621679084412"><span class="hs-identifier hs-type">maybeConnectTimeoutUs</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-176"></span><span>            </span><span class="annot"><span class="annottext">Maybe Int
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IOError -&gt; IO Int
 forall e a. (HasCallStack, Exception e) =&gt; e -&gt; IO a
 </span><span class="hs-identifier hs-var">throwIO</span></span><span> </span><span class="annot"><span class="annottext">(IOError -&gt; IO Int) -&gt; IOError -&gt; IO Int
@@ -397,16 +398,16 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">HostName -&gt; IOError
 </span><span class="hs-identifier hs-var">userError</span></span><span> </span><span class="annot"><span class="annottext">HostName
 </span><span class="hs-string">&quot;Timeout in connect attempt&quot;</span></span><span>
-</span><span id="line-176"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679084341"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679084341"><span class="hs-identifier hs-var">us</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; IO Int
+</span><span id="line-177"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679084416"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679084416"><span class="hs-identifier hs-var">us</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; IO Int
 forall a. a -&gt; IO a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679084341"><span class="hs-identifier hs-var">us</span></a></span><span>
-</span><span id="line-177"></span><span>
-</span><span id="line-178"></span><span>        </span><span id="local-6989586621679084342"><span class="annot"><a href="#local-6989586621679084342"><span class="hs-identifier hs-var">maybeResult</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">timeout</span></span><span> </span><span class="annot"><a href="#local-6989586621679084339"><span class="hs-identifier hs-type">connectTimeoutUs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">connect</span></span><span> </span><span class="annot"><a href="#local-6989586621679084336"><span class="hs-identifier hs-type">sock</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-var">addrAddress</span></span><span> </span><span class="annot"><a href="#local-6989586621679084331"><span class="hs-identifier hs-type">addr</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-179"></span><span>        </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621679084342"><span class="hs-identifier hs-type">maybeResult</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-180"></span><span>            </span><span class="annot"><span class="annottext">Maybe ()
+</span><a href="#local-6989586621679084416"><span class="hs-identifier hs-var">us</span></a></span><span>
+</span><span id="line-178"></span><span>
+</span><span id="line-179"></span><span>        </span><span id="local-6989586621679084417"><span class="annot"><a href="#local-6989586621679084417"><span class="hs-identifier hs-var">maybeResult</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">timeout</span></span><span> </span><span class="annot"><a href="#local-6989586621679084414"><span class="hs-identifier hs-type">connectTimeoutUs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">connect</span></span><span> </span><span class="annot"><a href="#local-6989586621679084411"><span class="hs-identifier hs-type">sock</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-var">addrAddress</span></span><span> </span><span class="annot"><a href="#local-6989586621679084406"><span class="hs-identifier hs-type">addr</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-180"></span><span>        </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621679084417"><span class="hs-identifier hs-type">maybeResult</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-181"></span><span>            </span><span class="annot"><span class="annottext">Maybe ()
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IOError -&gt; IO Socket
 forall e a. (HasCallStack, Exception e) =&gt; e -&gt; IO a
 </span><span class="hs-identifier hs-var">throwIO</span></span><span> </span><span class="annot"><span class="annottext">(IOError -&gt; IO Socket) -&gt; IOError -&gt; IO Socket
@@ -414,77 +415,115 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">HostName -&gt; IOError
 </span><span class="hs-identifier hs-var">userError</span></span><span> </span><span class="annot"><span class="annottext">HostName
 </span><span class="hs-string">&quot;Timeout in connect attempt&quot;</span></span><span>
-</span><span id="line-181"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Socket -&gt; IO Socket
+</span><span id="line-182"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Socket -&gt; IO Socket
 forall a. a -&gt; IO a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Socket
-</span><a href="#local-6989586621679084336"><span class="hs-identifier hs-var">sock</span></a></span><span>
-</span><span id="line-182"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-183"></span><span>        </span><span id="local-6989586621679084334"><span class="annot"><span class="annottext">initSocket :: IO Socket
-</span><a href="#local-6989586621679084334"><span class="hs-identifier hs-var hs-var">initSocket</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-184"></span><span>            </span><span class="annot"><span class="annottext">Family -&gt; SocketType -&gt; ProtocolNumber -&gt; IO Socket
+</span><a href="#local-6989586621679084411"><span class="hs-identifier hs-var">sock</span></a></span><span>
+</span><span id="line-183"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-184"></span><span>        </span><span id="local-6989586621679084409"><span class="annot"><span class="annottext">initSocket :: IO Socket
+</span><a href="#local-6989586621679084409"><span class="hs-identifier hs-var hs-var">initSocket</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-185"></span><span>            </span><span class="annot"><span class="annottext">Family -&gt; SocketType -&gt; ProtocolNumber -&gt; IO Socket
 </span><span class="hs-identifier hs-var">socket</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">AddrInfo -&gt; Family
 </span><span class="hs-identifier hs-var">addrFamily</span></span><span> </span><span class="annot"><span class="annottext">AddrInfo
-</span><a href="#local-6989586621679084331"><span class="hs-identifier hs-var">addr</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">AddrInfo -&gt; SocketType
+</span><a href="#local-6989586621679084406"><span class="hs-identifier hs-var">addr</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">AddrInfo -&gt; SocketType
 </span><span class="hs-identifier hs-var">addrSocketType</span></span><span> </span><span class="annot"><span class="annottext">AddrInfo
-</span><a href="#local-6989586621679084331"><span class="hs-identifier hs-var">addr</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">AddrInfo -&gt; ProtocolNumber
+</span><a href="#local-6989586621679084406"><span class="hs-identifier hs-var">addr</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">AddrInfo -&gt; ProtocolNumber
 </span><span class="hs-identifier hs-var">addrProtocol</span></span><span> </span><span class="annot"><span class="annottext">AddrInfo
-</span><a href="#local-6989586621679084331"><span class="hs-identifier hs-var">addr</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-185"></span><span>
-</span><span id="line-186"></span><span class="hs-comment">-- | `recoveringWith` @extraHandlers retryPolicy action@ will attempt to</span><span>
-</span><span id="line-187"></span><span class="hs-comment">-- run @action@. If the @action@ fails, @retryPolicy@ is used</span><span>
-</span><span id="line-188"></span><span class="hs-comment">-- to determine whether (and how often) this function should attempt to</span><span>
-</span><span id="line-189"></span><span class="hs-comment">-- retry @action@. By default, this function will retry after all</span><span>
-</span><span id="line-190"></span><span class="hs-comment">-- exceptions (except for those given by `skipAsyncExceptions`). This</span><span>
-</span><span id="line-191"></span><span class="hs-comment">-- behaviour may be customised with @extraHandlers@ which are installed</span><span>
-</span><span id="line-192"></span><span class="hs-comment">-- after `skipAsyncExceptions`, but before the default exception handler.</span><span>
-</span><span id="line-193"></span><span class="hs-comment">-- The @extraHandlers@ may also be used to report retry attempts to e.g.</span><span>
-</span><span id="line-194"></span><span class="hs-comment">-- the standard output or a logger.</span><span>
-</span><span id="line-195"></span><span id="local-6989586621679084153"><span id="local-6989586621679084154"><span class="annot"><a href="Network.Wait.html#recoveringWith"><span class="hs-identifier hs-type">recoveringWith</span></a></span><span>
-</span><span id="line-196"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084153"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084153"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-197"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">RetryStatus</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handler</span></span><span> </span><span class="annot"><a href="#local-6989586621679084153"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084153"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RetryStatus</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084153"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679084154"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084153"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679084154"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
-</span><span id="line-198"></span><span id="recoveringWith"><span class="annot"><span class="annottext">recoveringWith :: forall (m :: * -&gt; *) a.
+</span><a href="#local-6989586621679084406"><span class="hs-identifier hs-var">addr</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-186"></span><span>
+</span><span id="line-187"></span><span class="hs-comment">-- | `recoveringWith` @extraHandlers retryPolicy action@ will attempt to</span><span>
+</span><span id="line-188"></span><span class="hs-comment">-- run @action@. If the @action@ fails, @retryPolicy@ is used</span><span>
+</span><span id="line-189"></span><span class="hs-comment">-- to determine whether (and how often) this function should attempt to</span><span>
+</span><span id="line-190"></span><span class="hs-comment">-- retry @action@. By default, this function will retry after all</span><span>
+</span><span id="line-191"></span><span class="hs-comment">-- exceptions (except for those given by `skipAsyncExceptions`). This</span><span>
+</span><span id="line-192"></span><span class="hs-comment">-- behaviour may be customised with @extraHandlers@ which are installed</span><span>
+</span><span id="line-193"></span><span class="hs-comment">-- after `skipAsyncExceptions`, but before the default exception handler.</span><span>
+</span><span id="line-194"></span><span class="hs-comment">-- The @extraHandlers@ may also be used to report retry attempts to e.g.</span><span>
+</span><span id="line-195"></span><span class="hs-comment">-- the standard output or a logger.</span><span>
+</span><span id="line-196"></span><span id="local-6989586621679084233"><span id="local-6989586621679084234"><span class="annot"><a href="Network.Wait.html#recoveringWith"><span class="hs-identifier hs-type">recoveringWith</span></a></span><span>
+</span><span id="line-197"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084233"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084233"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-198"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">RetryStatus</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handler</span></span><span> </span><span class="annot"><a href="#local-6989586621679084233"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084233"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084233"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679084234"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084233"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679084234"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-199"></span><span id="recoveringWith"><span class="annot"><span class="annottext">recoveringWith :: forall (m :: * -&gt; *) a.
+(MonadIO m, MonadMask m) =&gt;
+[RetryStatus -&gt; Handler m Bool] -&gt; RetryPolicyM m -&gt; m a -&gt; m a
+</span><a href="Network.Wait.html#recoveringWith"><span class="hs-identifier hs-var hs-var">recoveringWith</span></a></span></span><span> </span><span id="local-6989586621679084428"><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
+</span><a href="#local-6989586621679084428"><span class="hs-identifier hs-var">hs</span></a></span></span><span> </span><span id="local-6989586621679084429"><span class="annot"><span class="annottext">RetryPolicyM m
+</span><a href="#local-6989586621679084429"><span class="hs-identifier hs-var">policy</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-200"></span><span>    </span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
+-&gt; RetryPolicyM m -&gt; (RetryStatus -&gt; m a) -&gt; m a
+forall (m :: * -&gt; *) a.
 (MonadIO m, MonadMask m) =&gt;
 [RetryStatus -&gt; Handler m Bool]
 -&gt; RetryPolicyM m -&gt; (RetryStatus -&gt; m a) -&gt; m a
-</span><a href="Network.Wait.html#recoveringWith"><span class="hs-identifier hs-var hs-var">recoveringWith</span></a></span></span><span> </span><span id="local-6989586621679084360"><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
-</span><a href="#local-6989586621679084360"><span class="hs-identifier hs-var">hs</span></a></span></span><span> </span><span id="local-6989586621679084361"><span class="annot"><span class="annottext">RetryPolicyM m
-</span><a href="#local-6989586621679084361"><span class="hs-identifier hs-var">policy</span></a></span></span><span> </span><span id="local-6989586621679084362"><span class="annot"><span class="annottext">RetryStatus -&gt; m a
-</span><a href="#local-6989586621679084362"><span class="hs-identifier hs-var">action</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-199"></span><span>    </span><span class="hs-comment">-- apply the retry policy to the following code, with the combinations of</span><span>
-</span><span id="line-200"></span><span>    </span><span class="hs-comment">-- the `skipAsyncExceptions`, given, and default handlers. The order of</span><span>
-</span><span id="line-201"></span><span>    </span><span class="hs-comment">-- the handlers matters as they are checked in order.</span><span>
-</span><span id="line-202"></span><span>    </span><span class="annot"><span class="annottext">RetryPolicyM m
+</span><a href="Network.Wait.html#recoveringWithStatus"><span class="hs-identifier hs-var">recoveringWithStatus</span></a></span><span> </span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
+</span><a href="#local-6989586621679084428"><span class="hs-identifier hs-var">hs</span></a></span><span> </span><span class="annot"><span class="annottext">RetryPolicyM m
+</span><a href="#local-6989586621679084429"><span class="hs-identifier hs-var">policy</span></a></span><span> </span><span class="annot"><span class="annottext">((RetryStatus -&gt; m a) -&gt; m a)
+-&gt; (m a -&gt; RetryStatus -&gt; m a) -&gt; m a -&gt; m a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">m a -&gt; RetryStatus -&gt; m a
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span>
+</span><span id="line-201"></span><span>
+</span><span id="line-202"></span><span>
+</span><span id="line-203"></span><span class="hs-comment">-- | `recoveringWithStatus` @extraHandlers retryPolicy action@ will attempt to</span><span>
+</span><span id="line-204"></span><span class="hs-comment">-- run @action@. If the @action@ fails, @retryPolicy@ is used</span><span>
+</span><span id="line-205"></span><span class="hs-comment">-- to determine whether (and how often) this function should attempt to</span><span>
+</span><span id="line-206"></span><span class="hs-comment">-- retry @action@. The `RetryStatus` is given to @action@ as argument.</span><span>
+</span><span id="line-207"></span><span class="hs-comment">-- By default, this function will retry after all</span><span>
+</span><span id="line-208"></span><span class="hs-comment">-- exceptions (except for those given by `skipAsyncExceptions`). This</span><span>
+</span><span id="line-209"></span><span class="hs-comment">-- behaviour may be customised with @extraHandlers@ which are installed</span><span>
+</span><span id="line-210"></span><span class="hs-comment">-- after `skipAsyncExceptions`, but before the default exception handler.</span><span>
+</span><span id="line-211"></span><span class="hs-comment">-- The @extraHandlers@ may also be used to report retry attempts to e.g.</span><span>
+</span><span id="line-212"></span><span class="hs-comment">-- the standard output or a logger.</span><span>
+</span><span id="line-213"></span><span id="local-6989586621679084220"><span id="local-6989586621679084221"><span class="annot"><a href="Network.Wait.html#recoveringWithStatus"><span class="hs-identifier hs-type">recoveringWithStatus</span></a></span><span>
+</span><span id="line-214"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadIO</span></span><span> </span><span class="annot"><a href="#local-6989586621679084220"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">MonadMask</span></span><span> </span><span class="annot"><a href="#local-6989586621679084220"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-215"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">RetryStatus</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Handler</span></span><span> </span><span class="annot"><a href="#local-6989586621679084220"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span class="hs-special">]</span><span>
+</span><span id="line-216"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RetryPolicyM</span></span><span> </span><span class="annot"><a href="#local-6989586621679084220"><span class="hs-identifier hs-type">m</span></a></span><span>
+</span><span id="line-217"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RetryStatus</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084220"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679084221"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-218"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679084220"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679084221"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-219"></span><span id="recoveringWithStatus"><span class="annot"><span class="annottext">recoveringWithStatus :: forall (m :: * -&gt; *) a.
+(MonadIO m, MonadMask m) =&gt;
+[RetryStatus -&gt; Handler m Bool]
+-&gt; RetryPolicyM m -&gt; (RetryStatus -&gt; m a) -&gt; m a
+</span><a href="Network.Wait.html#recoveringWithStatus"><span class="hs-identifier hs-var hs-var">recoveringWithStatus</span></a></span></span><span> </span><span id="local-6989586621679084442"><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
+</span><a href="#local-6989586621679084442"><span class="hs-identifier hs-var">hs</span></a></span></span><span> </span><span id="local-6989586621679084443"><span class="annot"><span class="annottext">RetryPolicyM m
+</span><a href="#local-6989586621679084443"><span class="hs-identifier hs-var">policy</span></a></span></span><span> </span><span id="local-6989586621679084444"><span class="annot"><span class="annottext">RetryStatus -&gt; m a
+</span><a href="#local-6989586621679084444"><span class="hs-identifier hs-var">action</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-220"></span><span>    </span><span class="hs-comment">-- apply the retry policy to the following code, with the combinations of</span><span>
+</span><span id="line-221"></span><span>    </span><span class="hs-comment">-- the `skipAsyncExceptions`, given, and default handlers. The order of</span><span>
+</span><span id="line-222"></span><span>    </span><span class="hs-comment">-- the handlers matters as they are checked in order.</span><span>
+</span><span id="line-223"></span><span>    </span><span class="annot"><span class="annottext">RetryPolicyM m
 -&gt; [RetryStatus -&gt; Handler m Bool] -&gt; (RetryStatus -&gt; m a) -&gt; m a
 forall (m :: * -&gt; *) a.
 (MonadIO m, MonadMask m) =&gt;
 RetryPolicyM m
 -&gt; [RetryStatus -&gt; Handler m Bool] -&gt; (RetryStatus -&gt; m a) -&gt; m a
 </span><span class="hs-identifier hs-var">recovering</span></span><span> </span><span class="annot"><span class="annottext">RetryPolicyM m
-</span><a href="#local-6989586621679084361"><span class="hs-identifier hs-var">policy</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
+</span><a href="#local-6989586621679084443"><span class="hs-identifier hs-var">policy</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
 forall (m :: * -&gt; *). MonadIO m =&gt; [RetryStatus -&gt; Handler m Bool]
 </span><span class="hs-identifier hs-var">skipAsyncExceptions</span></span><span> </span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
 -&gt; [RetryStatus -&gt; Handler m Bool]
 -&gt; [RetryStatus -&gt; Handler m Bool]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
-</span><a href="#local-6989586621679084360"><span class="hs-identifier hs-var">hs</span></a></span><span> </span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
+</span><a href="#local-6989586621679084442"><span class="hs-identifier hs-var">hs</span></a></span><span> </span><span class="annot"><span class="annottext">[RetryStatus -&gt; Handler m Bool]
 -&gt; [RetryStatus -&gt; Handler m Bool]
 -&gt; [RetryStatus -&gt; Handler m Bool]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">RetryStatus -&gt; Handler m Bool
 forall {m :: * -&gt; *} {p}. Applicative m =&gt; p -&gt; Handler m Bool
-</span><a href="#local-6989586621679084364"><span class="hs-identifier hs-var">defHandler</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((RetryStatus -&gt; m a) -&gt; m a) -&gt; (RetryStatus -&gt; m a) -&gt; m a
+</span><a href="#local-6989586621679084446"><span class="hs-identifier hs-var">defHandler</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((RetryStatus -&gt; m a) -&gt; m a) -&gt; (RetryStatus -&gt; m a) -&gt; m a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
-</span><span id="line-203"></span><span>        </span><span class="annot"><span class="annottext">RetryStatus -&gt; m a
-</span><a href="#local-6989586621679084362"><span class="hs-identifier hs-var">action</span></a></span><span>
-</span><span id="line-204"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-205"></span><span>        </span><span class="hs-comment">-- our default handler, which works with any exception derived from</span><span>
-</span><span id="line-206"></span><span>        </span><span class="hs-comment">-- `SomeException`, and signals that we should retry if allowed by</span><span>
-</span><span id="line-207"></span><span>        </span><span class="hs-comment">-- the retry policy</span><span>
-</span><span id="line-208"></span><span>        </span><span id="local-6989586621679084364"><span class="annot"><span class="annottext">defHandler :: p -&gt; Handler m Bool
-</span><a href="#local-6989586621679084364"><span class="hs-identifier hs-var hs-var">defHandler</span></a></span></span><span> </span><span class="annot"><span class="annottext">p
+</span><span id="line-224"></span><span>        </span><span class="annot"><span class="annottext">RetryStatus -&gt; m a
+</span><a href="#local-6989586621679084444"><span class="hs-identifier hs-var">action</span></a></span><span>
+</span><span id="line-225"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-226"></span><span>        </span><span class="hs-comment">-- our default handler, which works with any exception derived from</span><span>
+</span><span id="line-227"></span><span>        </span><span class="hs-comment">-- `SomeException`, and signals that we should retry if allowed by</span><span>
+</span><span id="line-228"></span><span>        </span><span class="hs-comment">-- the retry policy</span><span>
+</span><span id="line-229"></span><span>        </span><span id="local-6989586621679084446"><span class="annot"><span class="annottext">defHandler :: p -&gt; Handler m Bool
+</span><a href="#local-6989586621679084446"><span class="hs-identifier hs-var hs-var">defHandler</span></a></span></span><span> </span><span class="annot"><span class="annottext">p
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(SomeException -&gt; m Bool) -&gt; Handler m Bool
 forall (m :: * -&gt; *) a e. Exception e =&gt; (e -&gt; m a) -&gt; Handler m a
 </span><span class="hs-identifier hs-var">Handler</span></span><span> </span><span class="annot"><span class="annottext">((SomeException -&gt; m Bool) -&gt; Handler m Bool)
@@ -496,6 +535,6 @@ forall a. a -&gt; m a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-209"></span><span>
-</span><span id="line-210"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
-</span><span id="line-211"></span></pre></body></html>
+</span><span id="line-230"></span><span>
+</span><span id="line-231"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
+</span><span id="line-232"></span></pre></body></html>

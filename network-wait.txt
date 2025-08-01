@@ -98,7 +98,20 @@ waitSocketWith :: (MonadIO m, MonadMask m) => [RetryStatus -> Handler m Bool] ->
 --   <a>skipAsyncExceptions</a>, but before the default exception handler.
 --   The <tt>extraHandlers</tt> may also be used to report retry attempts
 --   to e.g. the standard output or a logger.
-recoveringWith :: (MonadIO m, MonadMask m) => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> (RetryStatus -> m a) -> m a
+recoveringWith :: (MonadIO m, MonadMask m) => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> m a -> m a
+
+-- | <a>recoveringWithStatus</a> <tt>extraHandlers retryPolicy action</tt>
+--   will attempt to run <tt>action</tt>. If the <tt>action</tt> fails,
+--   <tt>retryPolicy</tt> is used to determine whether (and how often) this
+--   function should attempt to retry <tt>action</tt>. The
+--   <a>RetryStatus</a> is given to <tt>action</tt> as argument. By
+--   default, this function will retry after all exceptions (except for
+--   those given by <a>skipAsyncExceptions</a>). This behaviour may be
+--   customised with <tt>extraHandlers</tt> which are installed after
+--   <a>skipAsyncExceptions</a>, but before the default exception handler.
+--   The <tt>extraHandlers</tt> may also be used to report retry attempts
+--   to e.g. the standard output or a logger.
+recoveringWithStatus :: (MonadIO m, MonadMask m) => [RetryStatus -> Handler m Bool] -> RetryPolicyM m -> (RetryStatus -> m a) -> m a
 
 
 -- | This module exports variants of the functions from <a>Network.Wait</a>
