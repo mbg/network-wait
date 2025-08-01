@@ -36,6 +36,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Docker Compose
+        if: |
+          contains(matrix.postgres-flag, 'network-wait:postgres') ||
+          contains(matrix.redis-flag, 'network-wait:redis')
+        uses: docker/setup-compose-action@v1
+
       - uses: haskell/actions/setup@v2
         id: install-haskell
         with:
@@ -90,12 +96,12 @@ jobs:
       - name: Start Docker containers (PostgreSQL)
         if: ${{ contains(matrix.postgres-flag, 'network-wait:postgres') }}
         run: |
-          docker-compose -p postgres -f docker-compose.postgresql.yaml up -d
+          docker compose -p postgres -f docker-compose.postgresql.yaml up -d
 
       - name: Start Docker containers (Redis)
         if: ${{ contains(matrix.redis-flag, 'network-wait:redis') }}
         run: |
-          docker-compose -p redis -f docker-compose.redis.yaml up -d
+          docker compose -p redis -f docker-compose.redis.yaml up -d
 
       - name: Test
         run: |
@@ -107,9 +113,9 @@ jobs:
       - name: Stop Docker containers (PostgreSQL)
         if: ${{ contains(matrix.postgres-flag, 'network-wait:postgres') }}
         run: |
-          docker-compose -p postgres -f docker-compose.postgresql.yaml down
+          docker compose -p postgres -f docker-compose.postgresql.yaml down
 
       - name: Stop Docker containers (Redis)
         if: ${{ contains(matrix.redis-flag, 'network-wait:redis') }}
         run: |
-          docker-compose -p redis -f docker-compose.redis.yaml down
+          docker compose -p redis -f docker-compose.redis.yaml down
