@@ -9,7 +9,7 @@
 --   documentation for all modules, including those that are gated behind
 --   package flags, at <a>https://mbg.github.io/network-wait/</a>
 @package network-wait
-@version 0.3.0.0
+@version 0.4.0.0
 
 
 -- | This module contains computations which wait for some networked
