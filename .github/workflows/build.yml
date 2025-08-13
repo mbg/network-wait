@@ -90,10 +90,10 @@ jobs:
           matrix.resolver == 'stack-lts24' &&
           contains(matrix.postgres-flag, 'network-wait:postgres') &&
           contains(matrix.redis-flag, 'network-wait:redis')
-        uses: JamesIves/github-pages-deploy-action@v4.6.0
+        id: deployment
+        uses: actions/upload-pages-artifact@v3
         with:
-          branch: docs/${{ github.ref_name }}
-          folder: docs
+          path: docs
 
       - name: Start Docker containers (PostgreSQL)
         if: ${{ contains(matrix.postgres-flag, 'network-wait:postgres') }}
@@ -121,3 +121,25 @@ jobs:
         if: ${{ contains(matrix.redis-flag, 'network-wait:redis') }}
         run: |
           docker compose -p redis -f docker-compose.redis.yaml down
+
+  deploy-haddock:
+    name: "Deploy Haddock"
+    runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/main'
+
+    needs:
+      - build
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
