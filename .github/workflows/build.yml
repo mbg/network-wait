@@ -42,7 +42,7 @@ jobs:
         if: |
           contains(matrix.postgres-flag, 'network-wait:postgres') ||
           contains(matrix.redis-flag, 'network-wait:redis')
-        uses: docker/setup-compose-action@v1
+        uses: docker/setup-compose-action@v2
 
       - uses: haskell/actions/setup@v2
         id: install-haskell
