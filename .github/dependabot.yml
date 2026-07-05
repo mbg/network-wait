@@ -8,8 +8,7 @@ updates:
       - "mbg"
   - package-ecosystem: "docker-compose"
     directories:
-      - "/docker-compose.postgresql.yaml"
-      - "/docker-compose.redis.yaml"
+      - "/"
     schedule:
       interval: "daily"
     assignees:
