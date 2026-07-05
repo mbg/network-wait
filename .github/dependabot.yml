@@ -6,3 +6,10 @@ updates:
       interval: "daily"
     assignees:
       - "mbg"
+  - package-ecosystem: "docker-compose"
+    directories:
+      - "/docker-compose.*.yaml"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "mbg"
